@@ -1,5 +1,4 @@
 import { Academy, Hall, Booking, BookingStatsType, PaginatedResponse } from "@/types";
-import { MOCK_ACADEMIES, MOCK_HALLS, MOCK_BOOKINGS } from "@/constants/mock-data";
 
 export type { Academy, Hall, Booking }; // Re-export for backward compatibility if needed, or just let components import from types
 

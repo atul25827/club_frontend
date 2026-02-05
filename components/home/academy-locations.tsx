@@ -83,7 +83,7 @@ export function AcademyLocations() {
                             className="shrink-0 w-[85vw] sm:w-[400px] md:w-[486px] h-[320px] relative rounded-[16px] overflow-hidden snap-center group cursor-pointer"
                         >
                             <Image
-                                src={academy.imageUrl}
+                                src={academy?.imageUrl ?? ""}
                                 alt={academy.name}
                                 fill
                                 unoptimized={true}
