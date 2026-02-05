@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/context/auth-context";
 import { useAcademy } from "@/context/academy-context";
 import { MasterData } from "@/types";
+import { api } from "@/lib/api";
 
 interface BookPageClientProps {
     masterData: MasterData | null;
@@ -19,18 +20,28 @@ export default function BookPageClient({ masterData }: BookPageClientProps) {
     const { academies } = useAcademy(); // Use context data
     const { isAuthenticated, isLoading } = useAuth();
 
+    // State for client-fetched master data
+    const [fetchedMasterData, setFetchedMasterData] = useState<MasterData | null>(null);
+
     // URL Params
     const academyIdParam = searchParams.get("academyId");
     const actionParam = searchParams.get("action");
 
     const isBookingMode = actionParam === "book";
 
-    // Protect Booking Route
+    // Protect Booking Route & Fetch Master Data
     useEffect(() => {
-        if (!isLoading && isBookingMode && !isAuthenticated) {
-            router.push("/login");
+        if (!isLoading && isBookingMode) {
+            if (!isAuthenticated) {
+                router.push("/login");
+            } else if (!masterData && !fetchedMasterData) {
+                // Fetch master data if not provided by server and not yet fetched
+                api.getMasterData().then(data => {
+                    if (data) setFetchedMasterData(data);
+                });
+            }
         }
-    }, [isLoading, isBookingMode, isAuthenticated, router]);
+    }, [isLoading, isBookingMode, isAuthenticated, router, masterData, fetchedMasterData]);
 
     // State for filter
     const [selectedAcademy, setSelectedAcademy] = useState<string>(academyIdParam || "all");
@@ -87,7 +98,7 @@ export default function BookPageClient({ masterData }: BookPageClientProps) {
             {isBookingMode ? (
                 <BookingForm
                     academyId={academyIdParam || ""}
-                    masterData={masterData}
+                    masterData={masterData || fetchedMasterData}
                     academies={academies}
                 />
             ) : (

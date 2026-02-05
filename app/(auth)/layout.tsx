@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { MerilLogo } from "@/components/meril-logo";
+import Link from "next/link";
 
 export default function AuthLayout({
     children,
@@ -11,7 +12,9 @@ export default function AuthLayout({
             {/* Left Side - Illustration */}
             <div className="hidden lg:flex relative flex-col items-center justify-center">
                 <div className="absolute top-8 left-8">
-                    <MerilLogo className="w-[80px] h-[50px]" />
+                    <Link href="/" className="flex items-center gap-2 z-50">
+                        <MerilLogo className="w-[80px] h-[50px]" />
+                    </Link>
                 </div>
 
                 <div className="relative w-full max-w-lg aspect-square">
