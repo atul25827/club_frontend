@@ -16,6 +16,7 @@ export interface Hall {
     capacity?: number;
     wifi?: number | boolean;
     screen?: number | boolean;
+    hall_name: string;
 }
 
 export interface Academy {
