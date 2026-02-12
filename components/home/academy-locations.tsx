@@ -82,13 +82,20 @@ export function AcademyLocations() {
                             onClick={() => handleCardClick(academy.id)}
                             className="shrink-0 w-[85vw] sm:w-[400px] md:w-[486px] h-[320px] relative rounded-[16px] overflow-hidden snap-center group cursor-pointer"
                         >
-                            <Image
-                                src={academy?.imageUrl ?? ""}
-                                alt={academy.name}
-                                fill
-                                unoptimized={true}
-                                className="object-cover group-hover:scale-105 transition-transform duration-700"
-                            />
+                            {academy.imageUrl && academy.imageUrl.trim() !== "" ? (
+                                <Image
+                                    src={academy.imageUrl}
+                                    alt={academy.name}
+                                    fill
+                                    unoptimized={true}
+                                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                                />
+                            ) : (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-100/50">
+                                    <MapPin className="w-12 h-12 text-slate-300 mb-2" />
+                                    <span className="text-slate-400 text-sm font-medium">Image Not Available</span>
+                                </div>
+                            )}
 
                             {/* Figma-Specific Label Design */}
                             <div className="absolute bottom-0 right-0 z-10">

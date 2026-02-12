@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { Hall } from "@/types";
 import { useAuth } from "@/context/auth-context";
 import { useRouter } from "next/navigation";
-import { Wifi, Monitor, Users } from "lucide-react";
+import { Wifi, Monitor, Users, Building2 } from "lucide-react";
 
 interface HallCardProps {
     hall: Hall;
@@ -28,12 +27,9 @@ export function HallCard({ hall, academyName }: HallCardProps) {
         <div className="relative w-full max-w-[380px] h-[300px] group mx-auto md:mx-0">
             {/* Main Card Container */}
             <div className="relative h-[280px] w-full rounded-[16px] overflow-hidden shadow-lg">
-                <Image
-                    src="/takshila_hall.jpg" // Using placeholder as we don't have dynamic images per hall yet
-                    alt={hall.name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+                <div className="w-full h-full bg-gradient-to-br from-slate-700 to-slate-900 flex items-center justify-center">
+                    <Building2 className="w-16 h-16 text-white/10" />
+                </div>
                 <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-80" />
 
                 {/* Title */}
