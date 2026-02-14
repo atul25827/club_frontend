@@ -16,6 +16,7 @@ export interface Hall {
     capacity?: number;
     wifi?: number | boolean;
     screen?: number | boolean;
+    hall_name: string;
 }
 
 export interface Academy {
@@ -73,6 +74,28 @@ export interface Booking {
     id?: string;
     specificRequirements?: string;
     overall_status?: string;
+    // Added for export compatibility
+    contact_number?: string;
+    vertical?: string;
+    merilian_code?: string;
+    no_of_participants?: number;
+    no_of_participants_international?: number;
+    event_type?: string;
+    it_requirement?: string;
+    specific_requirement_if_any?: string;
+    mats_event?: string;
+    mats_request_number?: string;
+    comment?: string;
+    creation?: string;
+    modified?: string;
+    event_planning?: Array<{
+        name?: string;
+        event_date: string;
+        event_start_time: string;
+        event_end_time: string;
+        hall: string;
+        booking_type?: string;
+    }>;
 }
 
 export interface Company {
@@ -127,6 +150,7 @@ export interface BookingDetail {
     academy: string;
     no_of_participants: number;
     vertical: string;
+    vertical_name: string;
     department: string;
     merilian_code: string;
     full_name: string;
@@ -137,8 +161,12 @@ export interface BookingDetail {
     it_requirement: string;
     mats_event: string;
     mats_request_number: string;
+    event_type?: string;
+    no_of_participants_international?: number;
+    comment?: string;
     owner?: string;
     can_approve?: boolean; // Indicates if the user can act on this booking
+    can_cancel?: boolean; // Indicates if the user can act on cancel request
     event_planning: Array<{
         name?: string;
         event_date: string;

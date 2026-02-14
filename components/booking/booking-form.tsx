@@ -61,10 +61,13 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
         trainingTitle: "",
         description: "",
         numberOfParticipants: "",
+        no_of_participants_international: "",
         itRequirements: "",
         specificRequirements: "",
         matsEvent: "",
         matsRequestNo: "",
+        event_type: "",
+        comment: "",
     });
 
     React.useEffect(() => {
@@ -202,15 +205,18 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
             description: formData.description,
             event_start_date: formData.startDate ? format(formData.startDate, "yyyy-MM-dd") : "",
             event_end_date: formData.endDate ? format(formData.endDate, "yyyy-MM-dd") : "",
-            no_of_participants: Number(formData.numberOfParticipants),
+            no_of_participants: (formData.event_type === 'Domestic' || formData.event_type === 'Both' || !formData.event_type) ? Number(formData.numberOfParticipants) : 0,
+            no_of_participants_international: (formData.event_type === 'International' || formData.event_type === 'Both') ? Number(formData.no_of_participants_international) : 0,
             it_requirement: formData.itRequirements,
             merilian_code: formData.merilianCode,
             full_name: formData.fullName,
             email: formData.email,
             contact_number: formData.contactNumber,
-            mats_request_number: formData.matsRequestNo,
+            mats_request_number: formData.matsEvent === "yes" ? formData.matsRequestNo : "",
             specific_requirement_if_any: formData.specificRequirements,
             mats_event: formData.matsEvent === "yes" ? "Yes" : "No",
+            event_type: formData.event_type,
+            comment: formData.comment,
             event_planning: sessionState.list.map(session => ({
                 hall: Array.isArray(session.trainingHall) ? session.trainingHall.join(",") : session.trainingHall,
                 booking_type: session.bookingType,
@@ -288,9 +294,6 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
                             />
                             {renderError("fullName")}
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="space-y-2 flex flex-col">
                             <FormLabel label="Contact Number" />
                             <Input
@@ -310,6 +313,23 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
                             {renderError("email")}
                         </div>
                         <div className="space-y-2 flex flex-col">
+                            <FormLabel label="Event Type" />
+                            <Select
+                                value={formData.event_type || ""}
+                                onValueChange={(val) => updateField("event_type", val)}
+                            >
+                                <SelectTrigger className="">
+                                    <SelectValue className="" placeholder="Select" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Domestic">Domestic</SelectItem>
+                                    <SelectItem value="International">International</SelectItem>
+                                    <SelectItem value="Both">Both</SelectItem>
+                                </SelectContent>
+                            </Select>
+                            {renderError("event_type")}
+                        </div>
+                        <div className="space-y-2 flex flex-col">
                             <FormLabel label="Attendees Vertical" />
                             <Select
                                 value={formData.attendeesVertical}
@@ -326,9 +346,6 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
                             </Select>
                             {renderError("attendeesVertical")}
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="space-y-2 flex flex-col">
                             <FormLabel label="Attendees Department" />
                             <Select
@@ -362,9 +379,6 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
                             />
                             {renderError("description")}
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="space-y-2 flex flex-col">
                             <FormLabel label="Event Start Date" />
                             <Popover>
@@ -466,44 +480,78 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
                                     {availableHalls.length === 0 ? (
                                         <div className="p-2 text-sm text-muted-foreground">No halls available</div>
                                     ) : (
-                                        availableHalls.map((hall) => {
-                                            const isSelected = (sessionState.draft.trainingHall || []).includes(hall.id);
-                                            return (
-                                                <div
-                                                    key={hall.id}
-                                                    className={cn(
-                                                        "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
-                                                        isSelected ? "bg-accent/50" : ""
-                                                    )}
-                                                    onClick={() => {
-                                                        const current = sessionState.draft.trainingHall || [];
-                                                        const newValue = current.includes(hall.id)
-                                                            ? current.filter((id: string) => id !== hall.id)
-                                                            : [...current, hall.id];
-                                                        updateSessionDraft("trainingHall", newValue);
-                                                    }}
-                                                >
-                                                    <div className={cn(
-                                                        "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
-                                                        isSelected ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible"
-                                                    )}>
-                                                        <svg
-                                                            className={cn("h-4 w-4")}
-                                                            xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 24 24"
-                                                            fill="none"
-                                                            stroke="currentColor"
-                                                            strokeWidth="2"
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                        >
-                                                            <polyline points="20 6 9 17 4 12" />
-                                                        </svg>
-                                                    </div>
-                                                    <span>{hall.name}</span>
+                                        <>
+                                            {/* Select All Option */}
+                                            <div
+                                                className="relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground font-normal"
+                                                onClick={() => {
+                                                    const allHallIds = availableHalls.map(h => h.id);
+                                                    const current = sessionState.draft.trainingHall || [];
+                                                    // If all generated IDs are already selected, deselect all; otherwise, select all
+                                                    const isAllSelected = allHallIds.every(id => current.includes(id));
+                                                    updateSessionDraft("trainingHall", isAllSelected ? [] : allHallIds);
+                                                }}
+                                            >
+                                                <div className={cn(
+                                                    "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                                    (sessionState.draft.trainingHall?.length === availableHalls.length && availableHalls.length > 0) ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible"
+                                                )}>
+                                                    <svg
+                                                        className="h-4 w-4"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        viewBox="0 0 24 24"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        strokeWidth="2"
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                    >
+                                                        <polyline points="20 6 9 17 4 12" />
+                                                    </svg>
                                                 </div>
-                                            );
-                                        })
+                                                <span>Select All</span>
+                                            </div>
+
+                                            {availableHalls.map((hall) => {
+                                                const isSelected = (sessionState.draft.trainingHall || []).includes(hall.id);
+                                                return (
+                                                    <div
+                                                        key={hall.id}
+                                                        className={cn(
+                                                            "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                                                            isSelected ? "bg-accent/50" : ""
+                                                        )}
+                                                        onClick={() => {
+                                                            const current = sessionState.draft.trainingHall || [];
+                                                            const newValue = current.includes(hall.id)
+                                                                ? current.filter((id: string) => id !== hall.id)
+                                                                : [...current, hall.id];
+                                                            updateSessionDraft("trainingHall", newValue);
+                                                        }}
+                                                    >
+                                                        <div className={cn(
+                                                            "mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary",
+                                                            isSelected ? "bg-primary text-primary-foreground" : "opacity-50 [&_svg]:invisible"
+                                                        )}>
+                                                            <svg
+                                                                className={cn("h-4 w-4")}
+                                                                xmlns="http://www.w3.org/2000/svg"
+                                                                viewBox="0 0 24 24"
+                                                                fill="none"
+                                                                stroke="currentColor"
+                                                                strokeWidth="2"
+                                                                strokeLinecap="round"
+                                                                strokeLinejoin="round"
+                                                            >
+                                                                <polyline points="20 6 9 17 4 12" />
+                                                            </svg>
+                                                        </div>
+                                                        <span>{hall.name}</span>
+                                                    </div>
+                                                );
+                                            })
+                                            }
+                                        </>
                                     )}
                                 </div>
                             </PopoverContent>
@@ -635,14 +683,36 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
             <div className="space-y-6">
                 <h3 className="text-[20px] font-normal text-[#271E4A] font-poppins">Participants Form</h3>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="space-y-2 flex flex-col">
-                        <FormLabel label="Number of Participants" />
-                        <Input
-                            value={formData?.numberOfParticipants}
-                            onChange={(e) => updateField("numberOfParticipants", e.target.value)}
-                        />
-                        {renderError("numberOfParticipants")}
-                    </div>
+                    {(formData.event_type === 'Domestic' || formData.event_type === 'Both') && (
+                        <div className="space-y-2 flex flex-col">
+                            <FormLabel label={formData.event_type === 'Both' ? "Number of Participants (Domestic)" : "Number of Participants (Domestic)"} />
+                            <Input
+                                value={formData?.numberOfParticipants}
+                                onChange={(e) => updateField("numberOfParticipants", e.target.value)}
+                            />
+                            {renderError("numberOfParticipants")}
+                        </div>
+                    )}
+                    {(formData.event_type === 'International' || formData.event_type === 'Both') && (
+                        <div className="space-y-2 flex flex-col">
+                            <FormLabel label={formData.event_type === 'Both' ? "Number of Participants (Int.)" : "Number of Participants (Int.)"} />
+                            <Input
+                                value={formData?.no_of_participants_international}
+                                onChange={(e) => updateField("no_of_participants_international", e.target.value)}
+                            />
+                            {renderError("no_of_participants_international")}
+                        </div>
+                    )}
+                    {(!formData.event_type) && (
+                        <div className="space-y-2 flex flex-col">
+                            <FormLabel label="Number of Participants" />
+                            <Input
+                                value={formData?.numberOfParticipants}
+                                onChange={(e) => updateField("numberOfParticipants", e.target.value)}
+                            />
+                            {renderError("numberOfParticipants")}
+                        </div>
+                    )}
                     <div className="space-y-2 flex flex-col">
                         <FormLabel label="IT Requirements" />
                         <Select
@@ -666,9 +736,6 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
                         />
                         {renderError("specificRequirements")}
                     </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <div className="space-y-2 flex flex-col">
                         <FormLabel label="MATS Event" />
                         <Select
@@ -683,15 +750,25 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
                         </Select>
                         {renderError("matsEvent")}
                     </div>
-                    <div className="space-y-2 flex flex-col">
-                        <FormLabel label="MATS Request No" />
+                    {formData.matsEvent === 'yes' && (
+                        <div className="space-y-2 flex flex-col">
+                            <FormLabel label="MATS Request No" />
+                            <Input
+                                value={formData.matsRequestNo}
+                                onChange={(e) => updateField("matsRequestNo", e.target.value)}
+                            />
+                        </div>
+                    )}
+                    <div className="space-y-2 flex flex-col md:col-span-1">
+                        <FormLabel label="Comment" required={false} />
                         <Input
-                            value={formData.matsRequestNo}
-                            onChange={(e) => updateField("matsRequestNo", e.target.value)}
+                            value={formData.comment}
+                            onChange={(e) => updateField("comment", e.target.value)}
                         />
-                        {renderError("matsRequestNo")}
+                        {renderError("comment")}
                     </div>
                 </div>
+
             </div>
 
             <div className="flex justify-end gap-4 pt-4">

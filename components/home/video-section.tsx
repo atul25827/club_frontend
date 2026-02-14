@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import { Play, Pause } from "lucide-react";
 import { useRef, useState } from "react";
-import Image from "next/image";
 
 export function VideoSection() {
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -47,11 +46,12 @@ export function VideoSection() {
                         <video
                             ref={videoRef}
                             className="w-full h-full object-cover"
-                            poster="https://images.unsplash.com/photo-1544928147-79a2e746b5bd?q=80&w=2070&auto=format&fit=crop"
+                            poster="/images/video-poster.jpg" // You might want to update this if a specific poster is available
                             onPlay={() => setIsPlaying(true)}
                             onPause={() => setIsPlaying(false)}
+                            controls={false}
                         >
-                            <source src="https://assets.mixkit.co/videos/preview/mixkit-group-of-people-walking-in-a-hallway-4835-large.mp4" type="video/mp4" />
+                            <source src="/Meril_Academy_Video_Final.mp4" type="video/mp4" />
                             Your browser does not support the video tag.
                         </video>
 

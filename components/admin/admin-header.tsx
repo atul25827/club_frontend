@@ -23,7 +23,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
     const displayUser = user || { name: "Aditya", role: "Academy Admin" };
 
     return (
-        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-40 w-full">
+        <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-40 w-full shadow-md">
             <h1 className="text-[24px] font-semibold text-[#271E4A] font-poppins">{title}</h1>
 
             <div className="flex items-center gap-4">

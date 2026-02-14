@@ -10,6 +10,7 @@ import { MapPin, Calendar, Search } from "lucide-react"; // Added Search icon
 import { useAcademy } from "@/context/academy-context";
 import { api } from "@/lib/api";
 import { useBookingExport } from "@/hooks/use-booking-export";
+import { StatusBadge } from "@/components/ui/status-badge";
 import { formatBookingForExport } from "@/lib/excel-export";
 
 interface BookingListProps {
@@ -57,7 +58,7 @@ export function BookingList({ onViewDetails }: BookingListProps) {
 
     const { handleExport, isExporting } = useBookingExport(
         async (page, limit, filters) => {
-            const response = await api.getApproverBookingList(
+            const response = await api.exportBookings(
                 page,
                 limit,
                 filters
@@ -83,21 +84,6 @@ export function BookingList({ onViewDetails }: BookingListProps) {
 
     const totalPages = Math.ceil(totalCount / itemsPerPage);
 
-    const getStatusBadge = (status: string) => {
-        const normalized = status?.toLowerCase() || "unknown";
-        switch (normalized) {
-            case "upcoming":
-            case "approved":
-                return <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-[#ECFDF3] text-[#027A48] text-xs font-medium border border-[#ABEFC6]">Approved</span>;
-            case "cancelled":
-            case "rejected":
-                return <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-[#FEF3F2] text-[#B42318] text-xs font-medium border border-[#FECDCA]">Rejected</span>;
-            case "pending":
-                return <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-[#FFFAEB] text-[#B54708] text-xs font-medium border border-[#FEDF89]">Pending</span>;
-            default:
-                return <span className="inline-flex items-center justify-center px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-xs font-medium border border-slate-200">{status}</span>;
-        }
-    }
 
     return (
         <div className="bg-white rounded-[24px] shadow-[0px_4px_15px_0px_rgba(131,131,131,0.64)] p-6 md:p-8 ">
@@ -215,7 +201,7 @@ export function BookingList({ onViewDetails }: BookingListProps) {
                                     <TableCell className="py-4 text-[#101828] font-normal text-sm">{booking.event_end_date}</TableCell>
                                     <TableCell className="py-4 text-[#101828] font-normal text-sm">{booking.event_title || "N/A"}</TableCell>
                                     <TableCell className="py-4 text-center">
-                                        {getStatusBadge(booking?.event_status || "Pending")}
+                                        <StatusBadge status={booking.event_status || "Pending"} />
                                     </TableCell>
                                     <TableCell className="py-4 text-[#101828] font-normal text-sm">{booking?.overall_status || "N/A"}</TableCell>
                                 </TableRow>
@@ -240,7 +226,7 @@ export function BookingList({ onViewDetails }: BookingListProps) {
                         <div key={booking.booking_id} onClick={() => onViewDetails(booking.booking_id)} className="bg-white border border-[#e5e7eb] rounded-[14px] p-4 shadow-sm active:scale-[0.98] transition-transform cursor-pointer">
                             <div className="flex items-start justify-between mb-3">
                                 <span className="font-medium text-[#6941C6] text-sm">#{booking.booking_id.toUpperCase()}</span>
-                                {getStatusBadge(booking.event_status || "Pending")}
+                                <StatusBadge status={booking.event_status || "Pending"} />
                             </div>
                             <h4 className="font-medium text-[#101828] text-base mb-4 line-clamp-2">
                                 {booking.event_title || "Untitled Event"}

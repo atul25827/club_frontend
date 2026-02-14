@@ -1,5 +1,4 @@
 import { Academy, Hall, Booking, BookingStatsType, PaginatedResponse } from "@/types";
-import { MOCK_ACADEMIES, MOCK_HALLS, MOCK_BOOKINGS } from "@/constants/mock-data";
 
 export type { Academy, Hall, Booking }; // Re-export for backward compatibility if needed, or just let components import from types
 
@@ -24,6 +23,24 @@ export const api = {
         } catch (error) {
             console.error("Error fetching calendar bookings:", error);
             return [];
+        }
+    },
+
+    async getLoggedUser() {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) return null;
+        try {
+            const res = await fetch(`${baseUrl}/api/method/academy.api.auth.get_logged_user`, {
+                method: 'GET',
+                credentials: 'include', // Sends 'sid' cookie
+                cache: 'no-store'
+            });
+            if (!res.ok) return null;
+            const data = await res.json();
+            return data.message;
+        } catch (e) {
+            console.error("Error fetching logged user:", e);
+            return null;
         }
     },
 
@@ -257,6 +274,51 @@ export const api = {
         }
     },
 
+
+    async exportBookings(
+        page: number = 1,
+        limit: number = 1000,
+        filters: { academy?: string; hall?: string; status?: string } = {}
+    ): Promise<PaginatedResponse<Booking>> {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) {
+            throw new Error("Configuration error: NEXT_PUBLIC_FRAPPE_URL is not defined");
+        }
+
+        const queryParams = new URLSearchParams({
+            page_number: page.toString(),
+            page_length: limit.toString(),
+        });
+
+        if (filters.academy && filters.academy !== "all") queryParams.append("academy", filters.academy);
+        if (filters.hall && filters.hall !== "all") queryParams.append("hall", filters.hall);
+        if (filters.status && filters.status !== "all") queryParams.append("status", filters.status);
+
+        try {
+            const response = await fetch(`${baseUrl}/api/method/academy.api.booking.get_booking_export?${queryParams.toString()}`, {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch bookings");
+            }
+
+            const json = await response.json();
+            console.log(json.message);
+            return json.message; // Assuming the structure based on user description
+        } catch (error) {
+            console.error("Error fetching paginated bookings:", error);
+            return {
+                data: [],
+                total_count: 0,
+                page_number: 1,
+                page_length: 10
+            };
+        }
+    },
+
     async getApproverStats(): Promise<BookingStatsType> {
         const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
         if (!baseUrl) throw new Error("Configuration error");
@@ -320,7 +382,7 @@ export const api = {
         }
     },
 
-    async updateBookingStatus(bookingId: string, action: "Approve" | "Reject", remarks?: string): Promise<any> {
+    async updateBookingStatus(bookingId: string, action: "Approve" | "Reject", remark?: string, requestType: "booking" | "cancel_request" = "booking"): Promise<any> {
         const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
         if (!baseUrl) throw new Error("Configuration error");
 
@@ -330,7 +392,12 @@ export const api = {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ booking_id: bookingId, action, remarks }),
+                body: JSON.stringify({
+                    booking_id: bookingId,
+                    action,
+                    remark,
+                    request_type: requestType
+                }),
                 credentials: 'include',
             });
 
@@ -341,6 +408,111 @@ export const api = {
             return await response.json();
         } catch (error) {
             console.error("Error updating booking status", error);
+            throw error;
+        }
+    },
+
+    async cancelBooking(bookingId: string, cancelComment: string): Promise<any> {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) throw new Error("Configuration error");
+
+        try {
+            const response = await fetch(`${baseUrl}/api/method/academy.api.booking.cancel_booking`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ booking_id: bookingId, cancel_comment: cancelComment }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || "Failed to cancel booking");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Error cancelling booking", error);
+            throw error;
+        }
+    },
+
+    async getUpcomingBookings(): Promise<any[]> {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) throw new Error("Configuration error");
+
+        try {
+            const response = await fetch(`${baseUrl}/api/method/academy.api.booking.get_upcoming_bookings`, {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                return [];
+            }
+
+            const json = await response.json();
+            return json.message || [];
+        } catch (error) {
+            console.error("Error fetching upcoming bookings", error);
+            return [];
+        }
+    },
+
+    async getMasterData(): Promise<import("@/types").MasterData | null> {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) {
+            console.error("NEXT_PUBLIC_FRAPPE_URL is not defined");
+            return null;
+        }
+
+        try {
+            const response = await fetch(`${baseUrl}/api/method/academy.api.master_data.get_master_data`, {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                console.error("Failed to fetch master data");
+                return null;
+            }
+
+            const json = await response.json();
+            return json.message;
+        } catch (error) {
+            console.error("Error fetching master data:", error);
+            return null;
+        }
+    },
+
+    async updateBookingEventPlanning(bookingId: string, payload: { event_planning_data: any[], no_of_participants?: number, no_of_participants_international?: number }): Promise<any> {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) throw new Error("Configuration error");
+
+        try {
+            const response = await fetch(`${baseUrl}/api/method/academy.api.booking.update_booking_event_planning`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    booking_id: bookingId,
+                    event_planning_data: payload.event_planning_data,
+                    no_of_participants: payload.no_of_participants,
+                    no_of_participants_international: payload.no_of_participants_international
+                }),
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || "Failed to update event planning");
+            }
+            return await response.json();
+        } catch (error) {
+            console.error("Error updating event planning", error);
             throw error;
         }
     },

@@ -26,30 +26,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Load auth state from localStorage on mount
     // Load auth state from localStorage or Cookie on mount
     // Load auth state from Cookie ONLY (Ideal Source of Truth for Next.js)
+    // Load auth state from Backend Session (Source of Truth)
     useEffect(() => {
-        const checkAuth = () => {
+        async function initAuth() {
             try {
-                // Parse auth_token from cookies
-                const cookies = document.cookie.split(';').reduce((acc, cookie) => {
-                    const [key, value] = cookie.trim().split('=');
-                    acc[key] = value;
-                    return acc;
-                }, {} as Record<string, string>);
+                // Fetch user profile from backend (uses sid cookie)
+                const userData = await api.getLoggedUser();
 
-                if (cookies.auth_token) {
-                    const userData = JSON.parse(decodeURIComponent(cookies.auth_token));
-                    setUser(userData);
+                if (userData) {
+                    // Map API response to User type
+                    const apiUser: User = {
+                        id: userData.user_id,
+                        name: userData.full_name || userData.user_id,
+                        email: userData.email || userData.user_id,
+                        role: userData.role || "Academy User",
+                        employeeCode: userData.employee_code,
+                        avatarUrl: userData.image
+                    };
+                    setUser(apiUser);
+                } else {
+                    setUser(null);
+                    // Optional: Clear middleware cookie if backend session is invalid
+                    // document.cookie = "auth_token=; path=/; max-age=0"; 
                 }
             } catch (error) {
-                console.error("Failed to restore auth session from cookie:", error);
-                // Clear potentially corrupt cookie
-                document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                console.error("Auth initialization failed:", error);
+                setUser(null);
             } finally {
                 setIsLoading(false);
             }
-        };
+        }
 
-        checkAuth();
+        initAuth();
     }, []);
 
     const login = async (email: string, password: string) => {
@@ -60,27 +68,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 throw new Error(result.error);
             }
 
-            const data = result.data;
-            const apiUser = {
-                id: data.message.user_id || "unknown",
-                name: data.message.full_name || data.message.user_id,
-                email: data.message.user_id,
-                role: data.message.role ? data.message.role : "Academy User",
-                avatarUrl: data.message.image,
-                employeeCode: data.message.employee_code,
-            } as User;
+            // Login successful on backend (sid cookie set)
+            // Now fetch the true profile from backend
+            const userData = await api.getLoggedUser();
 
-            if (data.message.role && (data.message.role.toLowerCase() === 'system manager' || data.message.role.toLowerCase().includes('academy admin'))) {
-                apiUser.role = 'Academy Admin';
-            } else {
-                apiUser.role = 'Academy User';
+            if (!userData) {
+                throw new Error("Failed to fetch user profile after login");
             }
 
+            const apiUser: User = {
+                id: userData.user_id,
+                name: userData.full_name || userData.user_id,
+                email: userData.email || userData.user_id,
+                role: userData.role || "Academy User",
+                employeeCode: userData.employee_code,
+                avatarUrl: userData.image
+            };
+
             setUser(apiUser);
-            // We use Cookie as the single source of truth for Middleware compatibility
+
+            // We continue to set auth_token cookie JUST for Middleware redirection (not for data trust)
             document.cookie = `auth_token=${encodeURIComponent(JSON.stringify(apiUser))}; path=/; max-age=${60 * 60 * 24 * 7}`;
 
-            if (apiUser.role.toUpperCase() === "ACADEMY ADMIN") {
+            if (apiUser.role?.toUpperCase() === "ACADEMY ADMIN") {
                 router.push("/dashboard");
             } else {
                 router.push("/");

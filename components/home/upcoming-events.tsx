@@ -4,43 +4,51 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
-// Mock Data for Upcoming Events (Updated to match design needs)
-const EVENTS = [
-    {
-        id: 1,
-        title: "EURO PCR 2025",
-        date: "2025-12-12",
-        startDay: "Monday",
-        startTime: "10:30AM",
-        endTime: "05:30 PM",
-        location: "Vapi Academy",
-        attendees: 150,
-    },
-    {
-        id: 2,
-        title: "Medical Tech Summit",
-        date: "2025-12-18",
-        startDay: "Sunday",
-        startTime: "09:00AM",
-        endTime: "04:00 PM",
-        location: "Mumbai Center",
-        attendees: 200,
-    },
-    {
-        id: 3,
-        title: "Health & Wellness Workshop",
-        date: "2026-01-05", // Example next year
-        startDay: "Friday",
-        startTime: "02:00PM",
-        endTime: "06:00 PM",
-        location: "Delhi Main Hall",
-        attendees: 85,
-    }
-];
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
+import { format } from "date-fns";
 
 export function UpcomingEvents() {
-    const hasEvents = EVENTS.length > 0;
+    const [events, setEvents] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function loadEvents() {
+            try {
+                const data = await api.getUpcomingBookings();
+                // Take only the first 3 events for the homepage display
+                setEvents(data.slice(0, 3));
+            } catch (e) {
+                console.error("Failed to load upcoming events", e);
+            } finally {
+                setLoading(false);
+            }
+        }
+        loadEvents();
+    }, []);
+
+    const hasEvents = events.length > 0;
+
+    // Optional: Loading state could be a skeleton, but for now we just render nothing or the section
+    if (loading) {
+        return (
+            <section className="py-10 md:py-16">
+                <div className="container px-4 md:px-6 max-w-7xl mx-auto">
+                    <div className="flex items-center justify-between md:mb-8 mb-4">
+                        <div>
+                            <span className="text-[#7D3FD0] font-medium tracking-wide uppercase text-sm">Don't Miss Out</span>
+                            <h2 className="text-[20px] md:text-[24px] font-medium text-slate-900 mt-2 font-poppins">Upcoming Events</h2>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[1, 2, 3].map((i) => (
+                            <div key={i} className="h-[160px] bg-slate-50 rounded-[12px] animate-pulse" />
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+    }
 
     return (
         <section className="py-10 md:py-16">
@@ -61,15 +69,20 @@ export function UpcomingEvents() {
 
                 {hasEvents ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {EVENTS.map((event, index) => {
-                            const eventDate = new Date(event.date);
-                            const month = eventDate.toLocaleDateString('en-US', { month: 'short' });
-                            const day = eventDate.toLocaleDateString('en-US', { day: '2-digit' });
-                            const year = eventDate.getFullYear();
+                        {events.map((event, index) => {
+                            const eventDate = new Date(event.event_start_date);
+                            const month = format(eventDate, 'MMM');
+                            const day = format(eventDate, 'dd');
+                            const year = format(eventDate, 'yyyy');
+                            const dayName = format(eventDate, 'EEEE');
+
+                            // Use provided start/end time if available, otherwise defaults
+                            const startTime = event.event_start_time || "09:00 AM";
+                            const endTime = event.event_end_time || "05:00 PM";
 
                             return (
                                 <motion.div
-                                    key={event.id}
+                                    key={event.booking_id || index}
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
@@ -80,23 +93,23 @@ export function UpcomingEvents() {
                                     <div className="flex-1 p-4 flex flex-col justify-between">
                                         {/* Date Time Header */}
                                         <div className="text-xs text-slate-500 font-medium uppercase tracking-wide">
-                                            {event.startDay} {event.startTime} To {event.endTime}
+                                            {dayName} {startTime.slice(0, 5)} To {endTime.slice(0, 5)}
                                         </div>
 
                                         {/* Title */}
                                         <h3 className="text-[16px] md:text-[20px] font-semibold text-slate-900 py-1 line-clamp-2">
-                                            {event.title}
+                                            {event.event_title || "Untitled Event"}
                                         </h3>
 
                                         {/* Meta Info */}
                                         <div className="space-y-2 mt-auto">
                                             <div className="flex items-center gap-2 text-sm text-slate-500">
                                                 <MapPin className="w-4 h-4 text-[#7D3FD0]" />
-                                                <span className="font-light">{event.location}</span>
+                                                <span className="font-light line-clamp-1">{event.academy || "Academy"}</span>
                                             </div>
                                             <div className="flex items-center gap-2 text-sm text-slate-500">
                                                 <Users className="w-4 h-4 text-[#7D3FD0]" />
-                                                <span className="font-light">{event.attendees} Attendees</span>
+                                                <span className="font-light">{event.no_of_participants || 0} Attendees</span>
                                             </div>
                                         </div>
                                     </div>
@@ -121,7 +134,6 @@ export function UpcomingEvents() {
                 ) : (
                     /* Empty State - Preserved mostly as is */
                     <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-3xl border border-dashed border-slate-200">
-                        {/* Using a generic Calendar icon here if valid, or just keeping the structure */}
                         <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
                             <span className="text-3xl">📅</span>
                         </div>
@@ -146,4 +158,3 @@ export function UpcomingEvents() {
         </section>
     );
 }
-
