@@ -13,19 +13,23 @@ import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/auth-context";
+import { BookingAuditTrail } from "@/components/booking/booking-audit-trail";
 import { useAcademy } from "@/context/academy-context";
 import { Pencil } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MasterData } from "@/types";
 import { Input } from "@/components/ui/input";
 
+import { AuditLogEntry } from "@/types";
+
 interface BookingDetailsViewProps {
     booking: BookingDetail;
+    auditLogs?: AuditLogEntry[];
 }
 
 import { StatusBadge } from "@/components/ui/status-badge";
 
-export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
+export function BookingDetailsView({ booking, auditLogs }: BookingDetailsViewProps) {
     const router = useRouter();
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [actionToPerform, setActionToPerform] = useState<'Approve' | 'Reject' | null>(null);
@@ -150,8 +154,10 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
     };
 
     // calculate if cancellable
-    const isCancellable = booking.event_status?.toLowerCase() === 'approved' &&
-        booking.event_start_date &&
+    const isCancellable = !booking.is_cancelled &&
+        !booking.cancel_request &&
+        booking.event_status?.toLowerCase() === 'approved' &&
+        !!booking.event_start_date &&
         new Date(booking.event_start_date) > new Date();
 
     return (
@@ -172,6 +178,7 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
                             </div>
 
                             <div className="flex items-center gap-2">
+                                <BookingAuditTrail bookingId={booking.booking_id} auditLogs={auditLogs || []} />
                                 {/* Cancel Button */}
                                 {isCancellable && (
                                     <Button
@@ -246,7 +253,6 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
                     </div>
                 </div>
             </div>
-
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Content - Left Column (2/3) */}
                 <div className="lg:col-span-2 space-y-6">
@@ -364,7 +370,7 @@ export function BookingDetailsView({ booking }: BookingDetailsViewProps) {
                             {user?.role === "Academy Admin" && (
                                 <Button size="sm" variant="outline" className="h-8 gap-2" onClick={initiateEditSchedule}>
                                     <Pencil className="h-3.5 w-3.5" />
-                                    Edit Schedule
+                                    {/* Edit Schedule */}
                                 </Button>
                             )}
                         </CardHeader>

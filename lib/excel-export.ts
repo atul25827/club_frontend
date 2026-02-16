@@ -22,6 +22,7 @@ export const formatBookingForExport = (booking: Booking) => {
         "Start Date": booking.event_start_date,
         "End Date": booking.event_end_date,
         "Status": booking.event_status || "N/A",
+        "Booking Status": booking.booking_status || "N/A",
         "Overall Status": booking.overall_status || "N/A",
         "Contact Number": booking.contact_number || "N/A",
         "Email": booking.email || "N/A",

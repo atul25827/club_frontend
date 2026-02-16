@@ -44,7 +44,6 @@ export default function AdminDashboardPage() {
     const handleViewDetails = (id: string) => {
         router.push(`/bookings/${id}`);
     };
-    console.log(bookings);
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Stats Section */}

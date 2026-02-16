@@ -485,55 +485,7 @@ export const api = {
         }
     },
 
-    async getUpcomingBookings(): Promise<any[]> {
-        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
-        if (!baseUrl) throw new Error("Configuration error");
 
-        try {
-            const response = await fetch(`${baseUrl}/api/method/academy.api.booking.get_upcoming_bookings`, {
-                method: 'GET',
-                credentials: 'include',
-                cache: 'no-store'
-            });
-
-            if (!response.ok) {
-                return [];
-            }
-
-            const json = await response.json();
-            return json.message || [];
-        } catch (error) {
-            console.error("Error fetching upcoming bookings", error);
-            return [];
-        }
-    },
-
-    async getMasterData(): Promise<import("@/types").MasterData | null> {
-        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
-        if (!baseUrl) {
-            console.error("NEXT_PUBLIC_FRAPPE_URL is not defined");
-            return null;
-        }
-
-        try {
-            const response = await fetch(`${baseUrl}/api/method/academy.api.master_data.get_master_data`, {
-                method: 'GET',
-                credentials: 'include',
-                cache: 'no-store'
-            });
-
-            if (!response.ok) {
-                console.error("Failed to fetch master data");
-                return null;
-            }
-
-            const json = await response.json();
-            return json.message;
-        } catch (error) {
-            console.error("Error fetching master data:", error);
-            return null;
-        }
-    },
 
     async updateBookingEventPlanning(bookingId: string, payload: { event_planning_data: any[], no_of_participants?: number, no_of_participants_international?: number }): Promise<any> {
         const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
@@ -562,6 +514,30 @@ export const api = {
         } catch (error) {
             console.error("Error updating event planning", error);
             throw error;
+        }
+    },
+
+    async getBookingAuditTrail(bookingId: string): Promise<any[]> {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) throw new Error("Configuration error");
+
+        try {
+            const response = await fetch(`${baseUrl}/api/method/academy.api.booking.get_booking_audit_trail?booking_id=${bookingId}`, {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                console.error("Failed to fetch audit trail");
+                return [];
+            }
+
+            const json = await response.json();
+            return json.message || [];
+        } catch (error) {
+            console.error("Error fetching audit trail", error);
+            return [];
         }
     },
 };

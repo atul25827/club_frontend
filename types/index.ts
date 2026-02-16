@@ -74,6 +74,7 @@ export interface Booking {
     id?: string;
     specificRequirements?: string;
     overall_status?: string;
+    booking_status?: string;
     // Added for export compatibility
     contact_number?: string;
     vertical?: string;
@@ -128,6 +129,7 @@ export interface BookingStatsType {
     total_approved: number;
     total_pending: number;
     total_rejected: number;
+    total_cancel: number;
 }
 
 export interface PaginatedResponse<T> {
@@ -164,9 +166,12 @@ export interface BookingDetail {
     event_type?: string;
     no_of_participants_international?: number;
     comment?: string;
+    cancel_comment?: string; // Reason for cancellation request
     owner?: string;
     can_approve?: boolean; // Indicates if the user can act on this booking
     can_cancel?: boolean; // Indicates if the user can act on cancel request
+    is_cancelled?: boolean;
+    cancel_request?: boolean;
     event_planning: Array<{
         name?: string;
         event_date: string;
@@ -175,4 +180,13 @@ export interface BookingDetail {
         hall: string;
         booking_type?: string;
     }>;
+}
+
+export interface AuditLogEntry {
+    timestamp: string;
+    action: string;
+    user: string;
+    user_role: string;
+    comment?: string;
+    status: string;
 }

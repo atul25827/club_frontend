@@ -1,7 +1,7 @@
 "use client";
 
 import { BookingStatsType } from "@/types";
-import { Calendar, CalendarCheck, Clock, XSquare } from "lucide-react";
+import { Calendar, CalendarCheck, Clock, XSquare, Ban } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DashboardStatsProps {
@@ -13,7 +13,8 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
         total_bookings = 0,
         total_approved = 0,
         total_pending = 0,
-        total_rejected = 0
+        total_rejected = 0,
+        total_cancel = 0,
     } = stats || {};
 
     const statsData = [
@@ -45,14 +46,23 @@ export function DashboardStats({ stats }: DashboardStatsProps) {
             label: "Total Rejected",
             value: total_rejected,
             icon: XSquare,
-            bgClass: "bg-[#FEE4E2]",
-            textClass: "text-[#B42318]",
-            iconClass: "text-[#B42318]"
+            bgClass: "bg-red-100",
+            textClass: "text-red-600",
+            iconClass: "text-red-600"
+        },
+        {
+            label: "Total Cancel",
+            value: total_cancel,
+            icon: Ban,
+            bgClass: "bg-orange-100",
+            textClass: "text-orange-600",
+            iconClass: "text-orange-600"
         }
+
     ];
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
             {statsData.map((stat, index) => (
                 <div
                     key={index}

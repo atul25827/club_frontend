@@ -105,5 +105,37 @@ export const apiServer = {
             console.error("Error fetching booking details:", error);
             return null;
         }
+    },
+
+    async getBookingAuditTrail(bookingId: string): Promise<any[]> {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) {
+            console.error("NEXT_PUBLIC_FRAPPE_URL is not defined");
+            return [];
+        }
+
+        try {
+            const cookieStore = await cookies();
+            const allCookies = cookieStore.getAll().map(c => `${c.name}=${c.value}`).join('; ');
+
+            const response = await fetch(`${baseUrl}/api/method/academy.api.booking.get_booking_audit_trail?booking_id=${bookingId}`, {
+                method: 'GET',
+                headers: {
+                    'Cookie': allCookies
+                },
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                console.error("Failed to fetch audit trail server-side");
+                return [];
+            }
+
+            const json = await response.json();
+            return json.message.message || [];
+        } catch (error) {
+            console.error("Error fetching audit trail:", error);
+            return [];
+        }
     }
 };

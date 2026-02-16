@@ -271,9 +271,9 @@ export default function CalendarView({ onEventClick }: CalendarViewProps) {
                                                 <p className="text-[10px] md:text-xs font-medium text-[#0050fd] line-clamp-1 group-hover/event:text-white">
                                                     {event.event_title}
                                                 </p>
-                                                <p className="text-[8px] md:text-[10px] text-[#0050fd]/80 line-clamp-1 group-hover/event:text-white/90">
+                                                {/* <p className="text-[8px] md:text-[10px] text-[#0050fd]/80 line-clamp-1 group-hover/event:text-white/90">
                                                     {event.status}
-                                                </p>
+                                                </p> */}
                                             </div>
                                         ))}
                                     </div>

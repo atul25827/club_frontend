@@ -1,6 +1,8 @@
 "use client";
 import { useRouter } from "next/navigation";
+
 import { BookingList } from "@/components/booking/booking-list";
+
 export default function AdminBookingsPage() {
     const router = useRouter();
 

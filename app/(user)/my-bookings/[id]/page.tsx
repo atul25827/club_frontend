@@ -12,7 +12,7 @@ export default async function BookingDetailsPage({ params }: PageProps) {
 
     // Fetch booking details on server side with cookies
     const booking = await apiServer.getBookingDetails(id);
-
+    const auditLogs = await apiServer.getBookingAuditTrail(id);
     if (!booking) {
         return (
             <div className="container mx-auto py-10 px-4 text-center">
@@ -29,6 +29,7 @@ export default async function BookingDetailsPage({ params }: PageProps) {
     return (
         <BookingDetailsView
             booking={booking}
+            auditLogs={auditLogs}
         />
     );
 }

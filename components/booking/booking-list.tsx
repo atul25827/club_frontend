@@ -99,9 +99,6 @@ export function BookingList({ onViewDetails }: BookingListProps) {
                             className="pl-10 h-[44px] rounded-[6px] border-[#BEBEBE]"
                         />
                     </div>
-                    <Button variant="outline" className="w-full md:w-auto h-[44px] px-6 rounded-[6px] border-[#B4B4B4] text-[#271E4A] hover:bg-slate-50">
-                        Export
-                    </Button>
                 </div> */}
 
                 <div className="flex flex-col md:flex-row gap-4 w-full">
@@ -116,6 +113,7 @@ export function BookingList({ onViewDetails }: BookingListProps) {
                             <SelectItem value="Rejected">Rejected</SelectItem>
                             <SelectItem value="Pending">Pending</SelectItem>
                             <SelectItem value="Awaiting">Awaiting Approval</SelectItem>
+                            <SelectItem value="Cancelled">Cancelled</SelectItem>
                         </SelectContent>
                     </Select>
 

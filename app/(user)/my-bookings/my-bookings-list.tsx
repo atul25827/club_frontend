@@ -103,6 +103,7 @@ export function MyBookingsList() {
                             <SelectItem value="approved">Approved</SelectItem>
                             <SelectItem value="rejected">Rejected</SelectItem>
                             <SelectItem value="pending">Pending</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
                         </SelectContent>
                     </Select>
 
@@ -160,6 +161,7 @@ export function MyBookingsList() {
                             <TableHead className="py-4 font-medium text-[#271E4A] text-sm">Event Start End</TableHead>
                             <TableHead className="py-4 font-medium text-[#271E4A] text-sm">Training/Event Title</TableHead>
                             <TableHead className="py-4 font-medium text-[#271E4A] text-sm text-center">Status</TableHead>
+                            <TableHead className="py-4 font-medium text-[#271E4A] text-sm text-center">Booking Status</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -188,6 +190,9 @@ export function MyBookingsList() {
                                     <TableCell className="py-4 text-[#101828] font-normal text-sm">{booking.event_title || "N/A"}</TableCell>
                                     <TableCell className="py-4 text-center">
                                         <StatusBadge status={booking.event_status || "Pending"} />
+                                    </TableCell>
+                                    <TableCell className="py-4 text-center">
+                                        {booking.booking_status}
                                     </TableCell>
                                 </TableRow>
                             ))
