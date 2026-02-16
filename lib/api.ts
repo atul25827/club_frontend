@@ -211,7 +211,8 @@ export const api = {
                         total_bookings: 0,
                         total_approved: 0,
                         total_pending: 0,
-                        total_rejected: 0
+                        total_rejected: 0,
+                        total_cancel: 0
                     }
                 };
             }
@@ -225,7 +226,8 @@ export const api = {
                     total_bookings: 0,
                     total_approved: 0,
                     total_pending: 0,
-                    total_rejected: 0
+                    total_rejected: 0,
+                    total_cancel: 0
                 }
             };
         }
@@ -334,7 +336,7 @@ export const api = {
             return json.message;
         } catch (error) {
             console.error("Error fetching stats:", error);
-            return { total_bookings: 0, total_approved: 0, total_rejected: 0, total_pending: 0 };
+            return { total_bookings: 0, total_approved: 0, total_rejected: 0, total_pending: 0, total_cancel: 0 };
         }
     },
 
