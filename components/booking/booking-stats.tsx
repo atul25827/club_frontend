@@ -65,7 +65,7 @@ export function BookingStats({ stats }: BookingStatsProps) {
                         "bg-white rounded-xl p-4 border transition-all duration-200 hover:shadow-md",
                         "flex flex-col justify-center h-[110px]",
                         stat.className.split(' ').pop() // Use border color
-                    )}
+                    )}  
                 >
                     <div className="flex justify-between items-center w-full">
                         <div className="flex flex-col">

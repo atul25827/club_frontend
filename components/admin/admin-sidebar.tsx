@@ -64,12 +64,12 @@ export function AdminSidebar() {
             </nav>
 
             {/* Password / Settings */}
-            <button
+            {/* <button
                 className="flex flex-col items-center justify-center p-3 rounded-[12px] w-[70px] h-[70px] text-[#5A5A5A] hover:bg-white/50 transition-all duration-200 mt-auto"
             >
                 <Lock className="h-6 w-6 mb-1" />
                 <span className="text-[10px] font-medium text-center leading-tight">Password</span>
-            </button>
+            </button> */}
         </aside>
     );
 }

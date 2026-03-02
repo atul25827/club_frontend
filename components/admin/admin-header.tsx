@@ -20,7 +20,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
     const { user, logout } = useAuth();
 
     // Default to Admin User if no user in context (for dev/mock)
-    const displayUser = user || { name: "Aditya", role: "Academy Admin" };
+    const displayUser = user || { name: "", role: "" };
 
     return (
         <header className="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 sticky top-0 z-40 w-full shadow-md">
@@ -29,7 +29,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
             <div className="flex items-center gap-4">
                 <div className="text-right hidden sm:block">
                     <p className="text-sm font-medium text-[#271E4A]">{displayUser.name}</p>
-                    <p className="text-xs text-gray-500">{displayUser.role == "Academy Admin" ? "Approver" : "User"}</p>
+                    <p className="text-xs text-gray-500">{displayUser.role == "Academy Admin" ? "Approver" : ""}</p>
                 </div>
 
                 <DropdownMenu>
@@ -37,7 +37,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
                         <Avatar className="h-10 w-10 cursor-pointer border border-gray-200">
                             <AvatarImage src="" />
                             <AvatarFallback className="bg-[#F2F4F7] text-[#475467] font-medium">
-                                {displayUser.name?.[0] || "A"}
+                                {displayUser.name?.[0] || ""}
                             </AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>

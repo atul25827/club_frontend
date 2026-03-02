@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/auth-context";
 import { BookingAuditTrail } from "@/components/booking/booking-audit-trail";
+import { AttendanceSection } from "@/components/booking/attendance-section";
 import { useAcademy } from "@/context/academy-context";
 import { Pencil } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -153,13 +154,6 @@ export function BookingDetailsView({ booking, auditLogs }: BookingDetailsViewPro
         }
     };
 
-    // calculate if cancellable
-    const isCancellable = !booking.is_cancelled &&
-        !booking.cancel_request &&
-        booking.event_status?.toLowerCase() === 'approved' &&
-        !!booking.event_start_date &&
-        new Date(booking.event_start_date) > new Date();
-
     return (
         <div className="container mx-auto py-2 max-w-7xl animate-in fade-in slide-in-from-bottom-4 duration-500">
             {/* Header */}
@@ -180,7 +174,7 @@ export function BookingDetailsView({ booking, auditLogs }: BookingDetailsViewPro
                             <div className="flex items-center gap-2">
                                 <BookingAuditTrail bookingId={booking.booking_id} auditLogs={auditLogs || []} />
                                 {/* Cancel Button */}
-                                {isCancellable && (
+                                {booking.is_cancellable && (
                                     <Button
                                         variant="outline"
                                         onClick={() => setIsCancelDialogOpen(true)}
@@ -414,6 +408,17 @@ export function BookingDetailsView({ booking, auditLogs }: BookingDetailsViewPro
                         </CardContent>
                     </Card>
                 </div>
+
+                {/* Attendance Section — visible only after event ends */}
+                {(!!booking.can_submit_attendence || !!booking.attendance_submitted) && (
+                    <div className="lg:col-span-3">
+                        <AttendanceSection
+                            bookingId={booking.booking_id}
+                            attendanceSubmitted={!!booking.attendance_submitted}
+                            attendanceFiles={booking.attendance_files || []}
+                        />
+                    </div>
+                )}
             </div>
 
             {/* Dialog */}

@@ -88,11 +88,11 @@ export const api = {
         }
     },
     async logout() {
-        const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
         if (!baseUrl) return;
 
         try {
-            await fetch(`${baseUrl}/api/method/academy.api.auth.logout`, {
+            await fetch(`${baseUrl}/api/method/logout`, {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -275,7 +275,6 @@ export const api = {
             };
         }
     },
-
 
     async exportBookings(
         page: number = 1,
@@ -487,8 +486,6 @@ export const api = {
         }
     },
 
-
-
     async updateBookingEventPlanning(bookingId: string, payload: { event_planning_data: any[], no_of_participants?: number, no_of_participants_international?: number }): Promise<any> {
         const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
         if (!baseUrl) throw new Error("Configuration error");
@@ -539,6 +536,59 @@ export const api = {
             return json.message || [];
         } catch (error) {
             console.error("Error fetching audit trail", error);
+            return [];
+        }
+    },
+
+    async uploadAttendanceFiles(bookingId: string, files: File[]): Promise<any> {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) throw new Error("Configuration error: NEXT_PUBLIC_FRAPPE_URL is not defined");
+
+        const formData = new FormData();
+        formData.append("booking_id", bookingId);
+        files.forEach((file) => {
+            formData.append("files", file);
+        });
+
+        try {
+            const response = await fetch(`${baseUrl}/api/method/academy.api.booking.upload_attendance`, {
+                method: 'POST',
+                body: formData,
+                credentials: 'include',
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({}));
+                throw new Error(error.message || "Failed to upload attendance files");
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error("Error uploading attendance files", error);
+            throw error;
+        }
+    },
+
+    async checkPendingAttendance(): Promise<import("@/types").PendingAttendanceBooking[]> {
+        const baseUrl = process.env.NEXT_PUBLIC_FRAPPE_URL;
+        if (!baseUrl) throw new Error("Configuration error: NEXT_PUBLIC_FRAPPE_URL is not defined");
+
+        try {
+            const response = await fetch(`${baseUrl}/api/method/academy.api.booking.check_pending_attendance`, {
+                method: 'GET',
+                credentials: 'include',
+                cache: 'no-store'
+            });
+
+            if (!response.ok) {
+                console.error("Failed to check pending attendance");
+                return [];
+            }
+
+            const json = await response.json();
+            return json.message?.data || json.message || [];
+        } catch (error) {
+            console.error("Error checking pending attendance", error);
             return [];
         }
     },

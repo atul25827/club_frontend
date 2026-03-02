@@ -166,6 +166,29 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
     };
 
     const handleSubmit = async () => {
+        // Check for pending attendance before allowing new booking
+        try {
+            const pendingBookings = await api.checkPendingAttendance();
+            console.log(pendingBookings, "pendingBookings");
+            if (pendingBookings.length > 0) {
+                toast.error(
+                    <div className="space-y-1.5">
+                        <p className="font-semibold">Pending Attendance Submission</p>
+                        <div className="text-xs text-black space-y-0.5">
+                            {pendingBookings.map((b, i) => (
+                                <p key={i}>• <strong>{b.event_title}</strong> <span className="text-muted-foreground">({b.booking_id})</span></p>
+                            ))}
+                        </div>
+                        <p className="text-xs text-muted-foreground pt-1">Please upload attendance for past events before booking a new one.</p>
+                    </div>,
+                    { duration: 8000 }
+                );
+                return;
+            }
+        } catch (error) {
+            console.error("Error checking pending attendance:", error);
+        }
+
         const newErrors: Record<string, string> = {};
 
         // Validation

@@ -172,6 +172,14 @@ export interface BookingDetail {
     can_cancel?: boolean; // Indicates if the user can act on cancel request
     is_cancelled?: boolean;
     cancel_request?: boolean;
+    is_approved?: boolean;
+    is_cancellable?: boolean;
+    can_submit_attendence?: boolean;
+    attendance_submitted?: boolean;
+    attendance_files?: Array<{
+        file_name: string;
+        file_url: string;
+    }>;
     event_planning: Array<{
         name?: string;
         event_date: string;
@@ -180,6 +188,12 @@ export interface BookingDetail {
         hall: string;
         booking_type?: string;
     }>;
+}
+
+export interface PendingAttendanceBooking {
+    booking_id: string;
+    event_title: string;
+    event_end_date: string;
 }
 
 export interface AuditLogEntry {

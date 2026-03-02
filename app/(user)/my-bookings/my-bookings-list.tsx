@@ -160,8 +160,8 @@ export function MyBookingsList() {
                             <TableHead className="py-4 font-medium text-[#271E4A] text-sm">Event Start Date</TableHead>
                             <TableHead className="py-4 font-medium text-[#271E4A] text-sm">Event Start End</TableHead>
                             <TableHead className="py-4 font-medium text-[#271E4A] text-sm">Training/Event Title</TableHead>
-                            <TableHead className="py-4 font-medium text-[#271E4A] text-sm text-center">Status</TableHead>
-                            <TableHead className="py-4 font-medium text-[#271E4A] text-sm text-center">Booking Status</TableHead>
+                            <TableHead className="py-4 font-medium text-[#271E4A] text-sm text-left">Status</TableHead>
+                            <TableHead className="py-4 font-medium text-[#271E4A] text-sm text-left">Booking Status</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -188,10 +188,10 @@ export function MyBookingsList() {
                                     <TableCell className="py-4 text-[#101828] font-normal text-sm">{booking.event_start_date}</TableCell>
                                     <TableCell className="py-4 text-[#101828] font-normal text-sm">{booking.event_end_date}</TableCell>
                                     <TableCell className="py-4 text-[#101828] font-normal text-sm">{booking.event_title || "N/A"}</TableCell>
-                                    <TableCell className="py-4 text-center">
+                                    <TableCell className="py-4 text-left">
                                         <StatusBadge status={booking.event_status || "Pending"} />
                                     </TableCell>
-                                    <TableCell className="py-4 text-center">
+                                    <TableCell className="py-4 text-left">
                                         {booking.booking_status}
                                     </TableCell>
                                 </TableRow>

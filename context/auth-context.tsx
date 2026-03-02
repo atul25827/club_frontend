@@ -23,10 +23,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
-    // Load auth state from localStorage on mount
-    // Load auth state from localStorage or Cookie on mount
-    // Load auth state from Cookie ONLY (Ideal Source of Truth for Next.js)
-    // Load auth state from Backend Session (Source of Truth)
     useEffect(() => {
         async function initAuth() {
             try {
@@ -46,8 +42,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                     setUser(apiUser);
                 } else {
                     setUser(null);
-                    // Optional: Clear middleware cookie if backend session is invalid
-                    // document.cookie = "auth_token=; path=/; max-age=0"; 
                 }
             } catch (error) {
                 console.error("Auth initialization failed:", error);
@@ -104,12 +98,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const logout = async () => {
         await api.logout();
         setUser(null);
-        document.cookie = "auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        document.cookie = "sid=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        document.cookie = "system_user=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        document.cookie = "full_name=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        document.cookie = "user_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        // Clear all cookies
+        document.cookie.split(";").forEach((c) => {
+            const name = c.split("=")[0].trim();
+            document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+        });
 
         router.push("/login");
     };
