@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Facebook, Twitter, Instagram, Linkedin, Send } from "lucide-react";
+import { Facebook, Youtube, Instagram, Linkedin, Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -29,13 +29,20 @@ export function Footer() {
                             Discover inspiring venues and curated details that make meetings memorable—plan your next event at our Meril.
                         </p>
                         <div className="flex gap-3">
-                            {[Facebook, Twitter, Instagram, Linkedin].map((Icon, i) => (
+                            {[
+                                { icon: Facebook, href: "https://www.facebook.com/MerilLifeSciences/" },
+                                { icon: Youtube, href: "https://www.youtube.com/channel/UCpPK08HhfAMqjKlTVSFJN1A" },
+                                { icon: Instagram, href: "https://www.instagram.com/merilglobal/" },
+                                { icon: Linkedin, href: "https://www.linkedin.com/company/meril-life-sciences-india-pvt-ltd/" },
+                            ].map((item, i) => (
                                 <Link
                                     key={i}
-                                    href="#"
+                                    href={item.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                     className="w-9 h-9 rounded-full bg-white border border-slate-200 hover:bg-[#7D3FD0] hover:border-[#7D3FD0] hover:text-white flex items-center justify-center transition-all duration-300 shadow-sm text-slate-600"
                                 >
-                                    <Icon className="w-4 h-4" />
+                                    <item.icon className="w-4 h-4" />
                                 </Link>
                             ))}
                         </div>
@@ -45,9 +52,9 @@ export function Footer() {
                     <div className="lg:col-span-2">
                         <h4 className="font-semibold text-[#33398A] mb-6">Company</h4>
                         <div className="flex flex-col gap-3 text-sm text-slate-600">
-                            <Link href="#" className="hover:text-[#7D3FD0] transition-colors">About Us</Link>
-                            <Link href="#" className="hover:text-[#7D3FD0] transition-colors">Careers</Link>
-                            <Link href="#" className="hover:text-[#7D3FD0] transition-colors">News & Media</Link>
+                            <Link href="/about" className="hover:text-[#7D3FD0] transition-colors">About Us</Link>
+                            {/* <Link href="#" className="hover:text-[#7D3FD0] transition-colors">Careers</Link>
+                            <Link href="#" className="hover:text-[#7D3FD0] transition-colors">News & Media</Link> */}
                             <Link href="#" className="hover:text-[#7D3FD0] transition-colors">Contact Us</Link>
                         </div>
                     </div>
