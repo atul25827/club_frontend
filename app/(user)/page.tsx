@@ -19,7 +19,7 @@ export default function Home() {
             className="flex flex-col gap-0 pb-10 overflow-x-hidden min-h-screen"
         >
             {/* Hero Section */}
-            <section className="relative pt-12 pb-10 md:pt-20 md:pb-16 overflow-hidden">
+            <section className="relative pt-8 pb-10 md:pt-4 md:pb-16 overflow-hidden">
                 {/* Gradient Background removed to use page background */}
 
 

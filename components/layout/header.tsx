@@ -92,7 +92,7 @@ export function Header() {
                                     variant="ghost"
                                     size="icon"
                                     onClick={logout}
-                                    className="text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-[12px]"
+                                    className="cursor-pointer text-slate-500 hover:text-red-500 hover:bg-red-50 rounded-[12px]"
                                     title="Logout"
                                 >
                                     <LogOut className="h-5 w-5" />
@@ -100,7 +100,7 @@ export function Header() {
                             </div>
                         ) : (
                             <Link href="/login" className="hidden sm:block">
-                                <Button className="rounded-[12px] bg-[#7D3FD0] hover:bg-[#6c35b5] text-white px-6 shadow-lg shadow-purple-900/20">
+                                <Button className="cursor-pointer rounded-[12px] bg-[#7D3FD0] hover:bg-[#6c35b5] text-white px-6 shadow-lg shadow-purple-900/20">
                                     Login
                                 </Button>
                             </Link>
@@ -157,7 +157,7 @@ export function Header() {
                                         </div>
                                         <Button
                                             // variant="destructive"
-                                            className="w-full bg-white border border-slate-200 text-red-500 hover:bg-red-50 rounded-[12px]"
+                                            className=" cursor-pointer w-full bg-white border border-slate-200 text-red-500 hover:bg-red-50 rounded-[12px]"
                                             onClick={logout}
                                         >
                                             Logout
@@ -165,7 +165,7 @@ export function Header() {
                                     </div>
                                 ) : (
                                     <Link href="/login">
-                                        <Button className="w-full bg-[#7D3FD0] hover:bg-[#6c35b5] text-white rounded-[12px] h-12 text-lg">
+                                        <Button className=" cursor-pointer w-full bg-[#7D3FD0] hover:bg-[#6c35b5] text-white rounded-[12px] h-12 text-lg">
                                             Login
                                         </Button>
                                     </Link>

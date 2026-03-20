@@ -7,7 +7,7 @@ export default function middleware(request: NextRequest) {
 
     // 1. Define guarded routes
     const adminRoutes = ['/dashboard', '/bookings', '/booking', '/admin'];
-    const userRoutes = ['/my-bookings', '/book', '/calendar', '/about'];
+    const userRoutes = ['/my-bookings', '/book'];
 
     const isProtectedAdminRoute = adminRoutes.some(route =>
         pathname === route || pathname.startsWith(`${route}/`)
