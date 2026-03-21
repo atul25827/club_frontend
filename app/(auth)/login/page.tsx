@@ -115,14 +115,14 @@ export default function LoginPage() {
                             href="#"
                             className="text-sm text-slate-500 underline decoration-slate-400/50 hover:text-purple-700 hover:decoration-purple-700 transition-colors"
                         >
-                            Forget your password
+                            Forgot your password?
                         </Link>
                     </div>
                 </div>
 
                 <Button
                     type="submit"
-                    className="w-full h-12 bg-[#7D3FD0] hover:bg-[#6c35b5] text-white text-lg font-normal rounded-[12px] shadow-lg shadow-purple-900/10 transition-all hover:shadow-purple-900/20"
+                    className="w-full cursor-pointer h-12 bg-[#7D3FD0] hover:bg-[#6c35b5] text-white text-lg font-normal rounded-[12px] shadow-lg shadow-purple-900/10 transition-all hover:shadow-purple-900/20"
                     disabled={loading}
                 >
                     {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}

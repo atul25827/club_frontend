@@ -1,7 +1,8 @@
 import { cookies } from "next/headers";
-import { api } from "@/lib/api";
+import { api } from "@/api/api";
 import { BookingStats } from "@/components/booking/booking-stats";
 import { MyBookingsList } from "./my-bookings-list";
+import { requireAuth } from "@/api/auth";
 
 export const metadata = {
     title: "My Bookings | Academy",
@@ -9,6 +10,8 @@ export const metadata = {
 };
 
 export default async function MyBookingsPage() {
+    // 🔐 SSR Protection: only authenticated non-admin users can access
+    await requireAuth();
     const cookieStore = await cookies();
     // We strictly need to pass 'Cookie' header for the Frappe backend to identify the user session
     // when calling from the server side.

@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { MapPin, Calendar, Search } from "lucide-react"; // Added Search icon
 import { useAcademy } from "@/context/academy-context";
-import { api } from "@/lib/api";
+import { api } from "@/api/api";
 import { useBookingExport } from "@/hooks/use-booking-export";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { formatBookingForExport } from "@/lib/excel-export";

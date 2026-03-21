@@ -7,7 +7,7 @@ import { Calendar as CalendarIcon, ChevronsUpDown, Trash2, Plus } from "lucide-r
 import { cn } from "@/lib/utils";
 import { MasterData, Academy } from "@/types";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { api } from "@/api/api";
 import { useAuth } from "@/context/auth-context";
 
 import { Button } from "@/components/ui/button";
@@ -169,7 +169,6 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
         // Check for pending attendance before allowing new booking
         try {
             const pendingBookings = await api.checkPendingAttendance();
-            console.log(pendingBookings, "pendingBookings");
             if (pendingBookings.length > 0) {
                 toast.error(
                     <div className="space-y-1.5">
@@ -195,7 +194,7 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
         const requiredFields: (keyof typeof formData)[] = [
             "academy", "merilianCode", "fullName", "contactNumber",
             "email", "attendeesDepartment",
-            "trainingTitle", "description", "numberOfParticipants",
+            "trainingTitle", "description",
             "itRequirements", "matsEvent"
         ];
 
@@ -270,7 +269,7 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
     const renderError = (field: string) => {
         return errors[field] ? <span className="text-red-500 text-xs mt-1">{errors[field]}</span> : null;
     };
-
+    console.log(errors);
     return (
         <div className="space-y-8">
             {/* Hall Booking Information */}
@@ -541,7 +540,7 @@ export function BookingForm({ academyId, masterData, academies, onSuccess, onCan
                                                     <div
                                                         key={hall.id}
                                                         className={cn(
-                                                            "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+                                                            "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground data-disabled:opacity-50",
                                                             isSelected ? "bg-accent/50" : ""
                                                         )}
                                                         onClick={() => {

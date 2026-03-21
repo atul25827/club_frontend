@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { api } from "@/lib/api";
+import { api } from "@/api/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Upload, FileText, X, CheckCircle2, Download, AlertCircle } from "lucide-react";
@@ -109,15 +109,15 @@ export function AttendanceSection({
                                     href={file.file_url.startsWith("http") ? file.file_url : `${baseUrl}${file.file_url}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:border-[#7D3FD0]/30 hover:bg-[#7D3FD0]/[0.02] transition-all"
+                                    className="group flex items-center gap-3 p-3 rounded-lg border border-slate-200 bg-white hover:border-[#7D3FD0]/30 hover:bg-[#7D3FD0]/2 transition-all"
                                 >
-                                    <div className="flex-shrink-0 h-9 w-9 rounded-lg bg-[#7D3FD0]/10 flex items-center justify-center">
+                                    <div className="shrink-0 h-9 w-9 rounded-lg bg-[#7D3FD0]/10 flex items-center justify-center">
                                         <FileText className="h-4.5 w-4.5 text-[#7D3FD0]" />
                                     </div>
                                     <span className="text-sm font-medium text-slate-700 truncate flex-1">
                                         {file.file_name}
                                     </span>
-                                    <Download className="h-4 w-4 text-slate-400 group-hover:text-[#7D3FD0] transition-colors flex-shrink-0" />
+                                    <Download className="h-4 w-4 text-slate-400 group-hover:text-[#7D3FD0] transition-colors shrink-0" />
                                 </a>
                             ))}
                         </div>
@@ -154,7 +154,7 @@ export function AttendanceSection({
                         "relative flex flex-col items-center justify-center gap-2 py-8 px-4 rounded-xl border-2 border-dashed cursor-pointer transition-all",
                         isDragOver
                             ? "border-[#7D3FD0] bg-[#7D3FD0]/5"
-                            : "border-slate-200 bg-slate-50/50 hover:border-[#7D3FD0]/40 hover:bg-[#7D3FD0]/[0.02]"
+                            : "border-slate-200 bg-slate-50/50 hover:border-[#7D3FD0]/40 hover:bg-[#7D3FD0]/2"
                     )}
                 >
                     <div className={cn(
@@ -196,11 +196,11 @@ export function AttendanceSection({
                                     key={idx}
                                     className="flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-50 border border-slate-100"
                                 >
-                                    <FileText className="h-4 w-4 text-[#7D3FD0] flex-shrink-0" />
+                                    <FileText className="h-4 w-4 text-[#7D3FD0] shrink-0" />
                                     <span className="text-sm text-slate-700 truncate flex-1">
                                         {file.name}
                                     </span>
-                                    <span className="text-xs text-slate-400 flex-shrink-0">
+                                    <span className="text-xs text-slate-400 shrink-0">
                                         {formatFileSize(file.size)}
                                     </span>
                                     <button
@@ -209,7 +209,7 @@ export function AttendanceSection({
                                             e.stopPropagation();
                                             removeFile(idx);
                                         }}
-                                        className="h-6 w-6 rounded-full flex items-center justify-center hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors flex-shrink-0"
+                                        className="h-6 w-6 rounded-full flex items-center justify-center hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors shrink-0"
                                     >
                                         <X className="h-3.5 w-3.5" />
                                     </button>

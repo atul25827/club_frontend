@@ -1,8 +1,11 @@
 import { Suspense } from "react";
 import BookPageClient from "./book-client";
-import { apiServer } from "@/lib/api-server";
+import { apiServer } from "@/api/api-server";
+import { requireAuth } from "@/api/auth";
 
 export default async function BookPage() {
+  // 🔐 SSR Protection: only authenticated users can book
+  await requireAuth();
   const masterData = null;
   return (
     <Suspense fallback={<div className="p-10 text-black font-poppins">Loading booking...</div>}>

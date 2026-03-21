@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useAuth } from "@/context/auth-context";
 import { useAcademy } from "@/context/academy-context";
 import { MasterData } from "@/types";
-import { api } from "@/lib/api";
+import { api } from "@/api/api";
 
 interface BookPageClientProps {
     masterData: MasterData | null;

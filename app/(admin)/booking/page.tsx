@@ -1,4 +1,4 @@
-import { apiServer } from "@/lib/api-server";
+import { apiServer } from "@/api/api-server";
 import { CreateBookingWrapper } from "./create-booking-wrapper";
 
 export default async function AdminCreateBookingPage() {

@@ -5,7 +5,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isSam
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAcademy } from "@/context/academy-context";
-import { api } from "@/lib/api";
+import { api } from "@/api/api";
 import { type Booking } from "@/types";
 import { cn } from "@/lib/utils";
 

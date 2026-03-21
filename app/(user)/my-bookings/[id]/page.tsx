@@ -1,13 +1,16 @@
-import { apiServer } from "@/lib/api-server";
+import { apiServer } from "@/api/api-server";
 import { BookingDetailsView } from "@/components/booking/booking-details-view";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { requireAuth } from "@/api/auth";
 
 interface PageProps {
     params: Promise<{ id: string }>;
 }
 
 export default async function BookingDetailsPage({ params }: PageProps) {
+    // 🔐 SSR Protection
+    await requireAuth();
     const { id } = await params;
 
     // Fetch booking details on server side with cookies

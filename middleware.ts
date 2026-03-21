@@ -1,14 +1,25 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+/**
+ * Middleware — Fast, cookie-based routing (UX layer, NOT security).
+ * 
+ * Real security lives in SSR via `requireAuth()` in layout.tsx.
+ * This middleware only does fast redirects using:
+ *   - `sid` cookie (set by Frappe, HttpOnly) → is user logged in?
+ *   - `role` cookie (set by /api/session, server-controlled) → what role?
+ * 
+ * ❌ No API calls here — Edge-compatible & fast.
+ */
 export default function middleware(request: NextRequest) {
-    const token = request.cookies.get('auth_token')?.value;
     const { pathname } = request.nextUrl;
 
-    // 1. Define guarded routes
+    const sid = request.cookies.get('sid')?.value;
+    const role = request.cookies.get('role')?.value?.toUpperCase();
+
+    // Define guarded route patterns
     const adminRoutes = ['/dashboard', '/bookings', '/booking', '/admin'];
     const userRoutes = ['/my-bookings', '/book'];
-
     const isProtectedAdminRoute = adminRoutes.some(route =>
         pathname === route || pathname.startsWith(`${route}/`)
     );
@@ -17,51 +28,32 @@ export default function middleware(request: NextRequest) {
         pathname === route || pathname.startsWith(`${route}/`)
     );
 
-    // SCENARIO 1: Any Protected Route Access
-    if (isProtectedAdminRoute || isProtectedUserRoute) {
-        if (!token) {
-            const loginUrl = new URL('/login', request.url);
-            loginUrl.searchParams.set('redirect', pathname);
-            return NextResponse.redirect(loginUrl);
-        }
+    //  Not logged in → redirect to login
+    if (!sid && (isProtectedAdminRoute || isProtectedUserRoute)) {
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        return NextResponse.redirect(loginUrl);
+    }
 
-        let user;
-        try {
-            user = JSON.parse(decodeURIComponent(token));
-        } catch (e) {
-            const response = NextResponse.redirect(new URL('/login', request.url));
-            response.cookies.delete('auth_token');
-            return response;
-        }
-
-        const role = user.role?.toUpperCase();
-
-        // RULE A: Non-Admins cannot access Admin Routes
+    //  Fast role-based routing (UX only, real check done in SSR)
+    if (sid && role) {
+        // Non-admins cannot access admin routes
         if (isProtectedAdminRoute && role !== 'ACADEMY ADMIN') {
             return NextResponse.redirect(new URL('/', request.url));
         }
 
-        // RULE B: Admins cannot access User-Only Routes (like My Bookings)
-        // This enforces the strict role separation you asked for.
+        // Admins cannot access user-only routes
         if (isProtectedUserRoute && role === 'ACADEMY ADMIN') {
             return NextResponse.redirect(new URL('/dashboard', request.url));
         }
     }
 
-    // SCENARIO 3: Public Route Access (already logged in)
-    // Prevent authenticated users from visiting Login page
-    if (pathname === '/login') {
-        if (token) {
-            try {
-                const user = JSON.parse(decodeURIComponent(token));
-                if (user.role?.toUpperCase() === 'ACADEMY ADMIN') {
-                    return NextResponse.redirect(new URL('/dashboard', request.url));
-                }
-                return NextResponse.redirect(new URL('/', request.url));
-            } catch (e) {
-                // Token invalid, let them stay on login page to re-login
-            }
+    // Prevent authenticated users from visiting login page
+    if (pathname === '/login' && sid && role) {
+        if (role === 'ACADEMY ADMIN') {
+            return NextResponse.redirect(new URL('/dashboard', request.url));
         }
+        return NextResponse.redirect(new URL('/', request.url));
     }
 
     return NextResponse.next();
