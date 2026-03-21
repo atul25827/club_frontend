@@ -12,7 +12,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { api } from "@/api/api";
+import { api } from "@/services/api";
 import { AuditLogEntry } from "@/types";
 import { StatusBadge } from "@/components/ui/status-badge";
 

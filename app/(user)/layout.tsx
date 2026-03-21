@@ -1,5 +1,5 @@
 import { AcademyProvider } from "@/context/academy-context";
-import { api, Academy } from "@/api/api";
+import { api, Academy } from "@/services/api";
 import { UserLayoutContent } from "./user-layout-content";
 
 export default async function UserLayout({

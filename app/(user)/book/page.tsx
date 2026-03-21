@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import BookPageClient from "./book-client";
-import { apiServer } from "@/api/api-server";
-import { requireAuth } from "@/api/auth";
+import { apiServer } from "@/services/api-server";
+import { requireAuth } from "@/services/auth";
 
 export default async function BookPage() {
   // 🔐 SSR Protection: only authenticated users can book

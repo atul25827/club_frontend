@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { MapPin, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import { api } from "@/api/api";
+import { api } from "@/services/api";
 import { format } from "date-fns";
 
 export function UpcomingEvents() {

@@ -1,21 +1,31 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { decryptSession } from '@/lib/session-crypto';
 
 /**
- * Middleware — Fast, cookie-based routing (UX layer, NOT security).
+ * Middleware — Fast, secure, cookie-based routing (UX layer).
  * 
- * Real security lives in SSR via `requireAuth()` in layout.tsx.
- * This middleware only does fast redirects using:
- *   - `sid` cookie (set by Frappe, HttpOnly) → is user logged in?
- *   - `role` cookie (set by /api/session, server-controlled) → what role?
+ * Verifies the cryptographically signed `app_session` JWT.
  * 
  * ❌ No API calls here — Edge-compatible & fast.
  */
-export default function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     const sid = request.cookies.get('sid')?.value;
-    const role = request.cookies.get('role')?.value?.toUpperCase();
+    const sessionCookie = request.cookies.get('app_session')?.value;
+
+    let role = null;
+    let isValidSession = false;
+
+    if (sid && sessionCookie) {
+        // Decrypt the JWT to extract the tamper-proof role
+        const session = await decryptSession(sessionCookie);
+        if (session && session.role) {
+            role = session.role.toUpperCase();
+            isValidSession = true;
+        }
+    }
 
     // Define guarded route patterns
     const adminRoutes = ['/dashboard', '/bookings', '/booking', '/admin'];
@@ -28,14 +38,18 @@ export default function middleware(request: NextRequest) {
         pathname === route || pathname.startsWith(`${route}/`)
     );
 
-    //  Not logged in → redirect to login
-    if (!sid && (isProtectedAdminRoute || isProtectedUserRoute)) {
+    //  Not logged in or tampered JWT → redirect to login
+    if (!isValidSession && (isProtectedAdminRoute || isProtectedUserRoute)) {
         const loginUrl = new URL('/login', request.url);
         loginUrl.searchParams.set('redirect', pathname);
-        return NextResponse.redirect(loginUrl);
+        const response = NextResponse.redirect(loginUrl);
+        // Wipe invalid cookies immediately
+        response.cookies.delete('app_session');
+        response.cookies.delete('role'); 
+        return response;
     }
 
-    //  Fast role-based routing (UX only, real check done in SSR)
+    // Fast role-based routing (UX only, real check done in SSR via requireAuth)
     if (sid && role) {
         // Non-admins cannot access admin routes
         if (isProtectedAdminRoute && role !== 'ACADEMY ADMIN') {

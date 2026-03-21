@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { api } from "@/api/api";
+import { api } from "@/services/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { Upload, FileText, X, CheckCircle2, Download, AlertCircle } from "lucide-react";

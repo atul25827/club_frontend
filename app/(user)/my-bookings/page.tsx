@@ -1,8 +1,8 @@
 import { cookies } from "next/headers";
-import { api } from "@/api/api";
+import { api } from "@/services/api";
 import { BookingStats } from "@/components/booking/booking-stats";
 import { MyBookingsList } from "./my-bookings-list";
-import { requireAuth } from "@/api/auth";
+import { requireAuth } from "@/services/auth";
 
 export const metadata = {
     title: "My Bookings | Academy",

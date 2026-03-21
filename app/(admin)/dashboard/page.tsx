@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { api } from "@/api/api";
+import { api } from "@/services/api";
 import { Booking, BookingStatsType } from "@/types";
 import { DashboardStats } from "@/components/admin/dashboard-stats";
 import { Button } from "@/components/ui/button";

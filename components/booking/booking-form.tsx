@@ -7,7 +7,7 @@ import { Calendar as CalendarIcon, ChevronsUpDown, Trash2, Plus } from "lucide-r
 import { cn } from "@/lib/utils";
 import { MasterData, Academy } from "@/types";
 import { toast } from "sonner";
-import { api } from "@/api/api";
+import { api } from "@/services/api";
 import { useAuth } from "@/context/auth-context";
 
 import { Button } from "@/components/ui/button";

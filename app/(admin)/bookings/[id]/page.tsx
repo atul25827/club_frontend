@@ -1,4 +1,4 @@
-import { apiServer } from "@/api/api-server";
+import { apiServer } from "@/services/api-server";
 import { BookingDetailsView } from "@/components/booking/booking-details-view";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

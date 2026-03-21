@@ -1,7 +1,7 @@
-import { api, Academy } from "@/api/api";
+import { api, Academy } from "@/services/api";
 import { AcademyProvider } from "@/context/academy-context";
 import { AdminLayoutContent } from "./admin-layout-content";
-import { requireAuth } from "@/api/auth";
+import { requireAuth } from "@/services/auth";
 
 export default async function AdminLayout({
     children,

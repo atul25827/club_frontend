@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "@/api/api";
+import { api } from "@/services/api";
 import { User, UserRole } from "@/types";
 
 interface AuthContextType {
@@ -66,32 +66,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     async function initAuth() {
         try {
-            const userData = await api.getLoggedUser();
-
-            if (userData) {
-                const apiUser: User = {
-                    id: userData.user_id,
-                    name: userData.full_name || userData.user_id,
-                    email: userData.email || userData.user_id,
-                    role: userData.role || "Academy User",
-                    employeeCode: userData.employee_code,
-                    avatarUrl: userData.image,
+            // 2. Refresh standard user data natively via JS to hydrate UI immediately
+            const profile = await api.getLoggedUser();
+            if (profile) {
+                const fetchedRole = profile.role || "Academy User";
+                const userData: User = {
+                    id: profile.user_id,
+                    name: profile.full_name || profile.user_id,
+                    email: profile.email || profile.user_id,
+                    role: fetchedRole,
+                    employeeCode: profile.employee_code,
+                    avatarUrl: profile.image,
                 };
-                setUser(apiUser);
+                setUser(userData);
 
-                // ✅ Set role cookie (UPPERCASE) for middleware fast routing
-                const role = (apiUser.role || "").toUpperCase();
-                document.cookie = `role=${role}; path=/; max-age=${60 * 60 * 24 * 7}`;
-
-                return apiUser;
+                // 3. Command the Next.js server to fetch Frappe securely from the Edge
+                // and mint a tamper-proof JWT `app_session` cookie.
+                const syncRes = await fetch('/api/auth/sync', { method: 'POST' });
+                if (!syncRes.ok) {
+                    console.error("Failed to sync secure session with Next.js server");
+                    // Continue anyway, but middleware won't let them in without `app_session`
+                }
+                return userData;
             } else {
                 setUser(null);
-                document.cookie = "role=; Max-Age=0; path=/";
                 return null;
             }
-        } catch {
+        } catch (error) {
+            console.error("Error during initAuth:", error);
             setUser(null);
-            document.cookie = "role=; Max-Age=0; path=/";
             return null;
         } finally {
             setIsLoading(false);
@@ -124,17 +127,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     // 🔐 LOGOUT
     const logout = async () => {
-        await api.logout();
+        try {
+            await api.logout();
 
-        setUser(null);
+            // Destroy the secure Next.js JWT Session
+            await fetch('/api/auth/sync', { method: 'DELETE' });
 
-        // Clear server-set role cookie
-        document.cookie = "role=; Max-Age=0; path=/";
+            setUser(null);
 
-        // 🔁 Broadcast logout to other tabs
-        broadcast("LOGOUT");
+            // 🔁 Broadcast logout to other tabs
+            broadcast("LOGOUT");
 
-        router.push("/login");
+            router.push("/login"); // Immediately redirect to wipe state
+        } catch (error) {
+            console.error("Error during logout:", error);
+            // Even if logout fails on backend, try to clear local state
+            setUser(null);
+            broadcast("LOGOUT");
+            router.push("/login");
+        }
     };
 
     return (

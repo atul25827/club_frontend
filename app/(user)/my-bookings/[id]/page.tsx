@@ -1,8 +1,8 @@
-import { apiServer } from "@/api/api-server";
+import { apiServer } from "@/services/api-server";
 import { BookingDetailsView } from "@/components/booking/booking-details-view";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { requireAuth } from "@/api/auth";
+import { requireAuth } from "@/services/auth";
 
 interface PageProps {
     params: Promise<{ id: string }>;
