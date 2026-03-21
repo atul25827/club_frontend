@@ -15,7 +15,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 ---
 
-## Architecture & Folder Structure
+## Architecture & Folder Structure for Api
 
 The project has been refactored for better separation of concerns, scalability, and security.
 
