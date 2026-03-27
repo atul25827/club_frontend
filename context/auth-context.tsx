@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // 2. Refresh standard user data natively via JS to hydrate UI immediately
             const profile = await api.getLoggedUser();
             if (profile) {
-                const fetchedRole = profile.role || "Academy User";
+                const fetchedRole = profile.role || ["Academy User"];
                 const userData: User = {
                     id: profile.user_id,
                     name: profile.full_name || profile.user_id,
@@ -116,12 +116,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         broadcast("LOGIN");
 
         // Redirect based on role
-        const role = (loggedUser?.role || "").toUpperCase();
-
-        if (role === "ACADEMY ADMIN") {
+        const rawRole = loggedUser?.role;
+        const roleArray = Array.isArray(rawRole) ? rawRole : [rawRole || ""];
+        const role = roleArray.map((r: string) => r.toUpperCase());
+        console.log(role, "rolerole")
+        if (role.includes("ACADEMY ADMIN") || role.includes("CLUB USER")) {
             router.push("/dashboard");
-        } else {
-            router.push("/");
+        }
+        else {
+            router.push("/dashboard");
         }
     };
 

@@ -14,7 +14,7 @@ import { getSession } from "./session";
  * @param roleCheck - Optional role to require (e.g., "ACADEMY ADMIN")
  * @returns The user's role string (UPPERCASE)
  */
-async function _requireAuth(roleCheck?: string): Promise<string> {
+async function _requireAuth(roleCheck?: string): Promise<string[]> {
     const cookieStore = await cookies();
     const sid = cookieStore.get("sid")?.value;
 
@@ -34,7 +34,7 @@ async function _requireAuth(roleCheck?: string): Promise<string> {
             redirect("/login");
         }
 
-        if (roleCheck && role !== roleCheck.toUpperCase()) {
+        if (roleCheck && !role.includes(roleCheck.toUpperCase())) {
             redirect("/");
         }
 

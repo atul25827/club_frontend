@@ -4,7 +4,7 @@ import { getBaseUrl } from "@/lib/client-fetcher";
 
 export interface SessionResult {
     user: User | null;
-    role: string | null;
+    role: string[] | null;
 }
 
 /**
@@ -36,6 +36,7 @@ export async function getSession(cookieHeader: string): Promise<SessionResult> {
 
         const userData = await userRes.json();
         const profile = userData.message;
+        console.log(userData, "userDatauserDatauserData")
 
         if (!profile || !profile.user_id) {
             return { user: null, role: null };
@@ -45,12 +46,13 @@ export async function getSession(cookieHeader: string): Promise<SessionResult> {
             id: profile.user_id,
             name: profile.full_name || profile.user_id,
             email: profile.email || profile.user_id,
-            role: profile.role || "Academy User",
+            role: profile.role || ["Academy User"],
             employeeCode: profile.employee_code,
             avatarUrl: profile.image,
         };
 
-        const role = (user.role || "").toUpperCase();
+        const roleArray = Array.isArray(user.role) ? user.role : [user.role || ""];
+        const role = roleArray.map((r: string) => r.toUpperCase());
 
         return { user, role };
     } catch (error) {

@@ -22,6 +22,10 @@ export function StatusBadge({ status, className }: StatusBadgeProps) {
                 return "bg-slate-100 text-slate-700 border-slate-200";
             case "attendence submitted":
                 return "bg-blue-50 text-blue-700 border-blue-200";
+            case "draft":
+                return "bg-gray-100 text-gray-700 border-gray-200";
+            case "submitted":
+                return "bg-[#EFF8FF] text-[#175CD3] border-[#B2DDFF]";
             default:
                 return "bg-slate-100 text-slate-600 border-slate-200";
         }

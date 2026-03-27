@@ -13,19 +13,19 @@ const sidebarItems = [
         icon: LayoutGrid,
     },
     {
+        title: "All Bookings",
+        href: "/club-booking-list",
+        icon: CheckSquare,
+    },
+    {
         title: "Booking",
-        href: "/booking",
+        href: "/club-booking",
         icon: ClipboardList,
     },
     {
-        title: "Calendar",
-        href: "/admin/calendar",
+        title: "Reports",
+        href: "/calendar",
         icon: Calendar,
-    },
-    {
-        title: "All Bookings",
-        href: "/bookings",
-        icon: CheckSquare,
     },
 ];
 

@@ -15,59 +15,49 @@ export async function middleware(request: NextRequest) {
     const sid = request.cookies.get('sid')?.value;
     const sessionCookie = request.cookies.get('app_session')?.value;
 
-    let role = null;
+    let role: string[] | null = null;
     let isValidSession = false;
 
     if (sid && sessionCookie) {
         // Decrypt the JWT to extract the tamper-proof role
         const session = await decryptSession(sessionCookie);
         if (session && session.role) {
-            role = session.role.toUpperCase();
+            const rawRole = session.role;
+            const roleArray = Array.isArray(rawRole) ? rawRole : [rawRole];
+            role = roleArray.map((r: string) => r?.toUpperCase() || "");
             isValidSession = true;
         }
     }
 
     // Define guarded route patterns
-    const adminRoutes = ['/dashboard', '/bookings', '/booking', '/admin'];
-    const userRoutes = ['/my-bookings', '/book'];
-    const isProtectedAdminRoute = adminRoutes.some(route =>
-        pathname === route || pathname.startsWith(`${route}/`)
-    );
+    const protectedRoutes = ['/dashboard'];
 
-    const isProtectedUserRoute = userRoutes.some(route =>
+    const isProtectedRoute = protectedRoutes.some(route =>
         pathname === route || pathname.startsWith(`${route}/`)
     );
 
     //  Not logged in or tampered JWT → redirect to login
-    if (!isValidSession && (isProtectedAdminRoute || isProtectedUserRoute)) {
+    if (!isValidSession && isProtectedRoute) {
         const loginUrl = new URL('/login', request.url);
         loginUrl.searchParams.set('redirect', pathname);
         const response = NextResponse.redirect(loginUrl);
         // Wipe invalid cookies immediately
         response.cookies.delete('app_session');
-        response.cookies.delete('role'); 
+        response.cookies.delete('role');
         return response;
     }
 
-    // Fast role-based routing (UX only, real check done in SSR via requireAuth)
-    if (sid && role) {
-        // Non-admins cannot access admin routes
-        if (isProtectedAdminRoute && role !== 'ACADEMY ADMIN') {
-            return NextResponse.redirect(new URL('/', request.url));
-        }
-
-        // Admins cannot access user-only routes
-        if (isProtectedUserRoute && role === 'ACADEMY ADMIN') {
+    // Default page redirection
+    if (pathname === '/') {
+        if (isValidSession) {
             return NextResponse.redirect(new URL('/dashboard', request.url));
         }
+        return NextResponse.redirect(new URL('/login', request.url));
     }
 
     // Prevent authenticated users from visiting login page
-    if (pathname === '/login' && sid && role) {
-        if (role === 'ACADEMY ADMIN') {
-            return NextResponse.redirect(new URL('/dashboard', request.url));
-        }
-        return NextResponse.redirect(new URL('/', request.url));
+    if (pathname === '/login' && isValidSession) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
     }
 
     return NextResponse.next();

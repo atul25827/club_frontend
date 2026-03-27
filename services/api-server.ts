@@ -1,34 +1,46 @@
-import { Academy, MasterData } from "@/types";
+import { Country, State, ClubMasterData } from "@/types";
 import { API_ROUTES } from "./api-routes";
 import { getBaseUrl, mapAcademyData } from "@/lib/client-fetcher";
 import { serverFetch } from "@/lib/server-fetcher";
 
 export const apiServer = {
-    async getMasterData(): Promise<MasterData | null> {
+    async getClubMasterData(): Promise<ClubMasterData | null> {
         try {
-            const json = await serverFetch(API_ROUTES.masterData.get);
-            return json.message;
+            const json = await serverFetch(API_ROUTES.clubMasterData.get);
+            console.log(json, "jsonjsonjsonjson");
+            return json.message?.data || json.message || [];
         } catch (error) {
             console.error("Error fetching master data:", error);
             return null;
         }
     },
 
-    async getAcademiesWithHalls(): Promise<Academy[]> {
+    async getCountries(): Promise<Country[]> {
         try {
-            const json = await serverFetch(API_ROUTES.academy.getAcademiesWithHalls, { skipAuth: true });
-            const rawData = json.message?.data || [];
-            return mapAcademyData(rawData, getBaseUrl());
+            const json = await serverFetch(API_ROUTES.clubMasterData.getCountries);
+            return json.message?.data || json.message || [];
         } catch (error) {
-            console.error("Error fetching academies:", error);
+            console.error("Error fetching countries:", error);
             return [];
         }
     },
 
-    async getBookingDetails(bookingId: string): Promise<any> {
+    async getStates(country: string): Promise<State[]> {
         try {
-            const json = await serverFetch(API_ROUTES.booking.getDetails, {
-                params: { booking_id: bookingId },
+            const json = await serverFetch(API_ROUTES.clubMasterData.getStates, {
+                params: { country },
+            });
+            return json.message?.data || json.message || [];
+        } catch (error) {
+            console.error("Error fetching states:", error);
+            return [];
+        }
+    },
+
+    async getBookingDetails(club_booking_id: string): Promise<any> {
+        try {
+            const json = await serverFetch(API_ROUTES.clubBooking.getDetails, {
+                params: { club_booking_id },
             });
             return json.message?.data || json.message || null;
         } catch (error) {
@@ -37,15 +49,14 @@ export const apiServer = {
         }
     },
 
-    async getBookingAuditTrail(bookingId: string): Promise<any[]> {
+    async getBookingAuditTrail(club_booking_id: string): Promise<any[]> {
         try {
-            const json = await serverFetch(API_ROUTES.booking.getAuditTrail, {
-                params: { booking_id: bookingId },
-            });
-            return json.message?.message || [];
+            // Placeholder for audit trail until an API route is defined
+            return [];
         } catch (error) {
             console.error("Error fetching audit trail:", error);
             return [];
         }
     },
+
 };

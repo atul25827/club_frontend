@@ -8,27 +8,16 @@ export const API_ROUTES = {
         logout: "/api/method/logout",
         getLoggedUser: "/api/method/academy.api.auth.get_logged_user",
     },
-    academy: {
-        getAcademiesWithHalls: "/api/method/academy.api.academy.get_academies_with_halls",
+    clubMasterData: {
+        get: "/api/method/academy.api.club_master_data.get_club_masters",
+        getCountries: "/api/method/academy.api.club_master_data.get_countries",
+        getStates: "/api/method/academy.api.club_master_data.get_states",
     },
-    booking: {
-        create: "/api/method/academy.api.booking.create_booking",
-        getList: "/api/method/academy.api.booking.get_booking_list",
-        getExport: "/api/method/academy.api.booking.get_booking_export",
-        getDetails: "/api/method/academy.api.booking.get_booking_details",
-        getCalendar: "/api/method/academy.api.booking.get_calendar_bookings",
-        getUpcoming: "/api/method/academy.api.booking.get_upcoming_bookings",
-        updateStatus: "/api/method/academy.api.booking.update_booking_status",
-        cancel: "/api/method/academy.api.booking.cancel_booking",
-        updateEventPlanning: "/api/method/academy.api.booking.update_booking_event_planning",
-        getAuditTrail: "/api/method/academy.api.booking.get_booking_audit_trail",
-        uploadAttendance: "/api/method/academy.api.booking.upload_attendance",
-        checkPendingAttendance: "/api/method/academy.api.booking.check_pending_attendance",
-        getUserStats: "/api/method/academy.api.booking.get_user_booking_stats",
-        getApproverStats: "/api/method/academy.api.booking.get_approver_stats",
-        getApproverList: "/api/method/academy.api.booking.get_approver_booking_list",
-    },
-    masterData: {
-        get: "/api/method/academy.api.master_data.get_master_data",
+    clubBooking: {
+        create: "/api/method/academy.api.club_booking.create_booking",
+        submit: "/api/method/academy.api.club_booking.submit_booking",
+        getDetails: "/api/method/academy.api.club_booking.get_club_booking_details",
+        deleteChild: "/api/method/academy.api.club_booking.delete_club_booking_item",
+        getList: "/api/method/academy.api.club_booking.get_club_booking_list",
     },
 } as const;

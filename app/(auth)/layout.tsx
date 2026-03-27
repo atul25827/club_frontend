@@ -89,7 +89,7 @@ export default function AuthLayout({
                 <div className="relative w-full max-w-lg aspect-square">
                     <Image
                         src="/images/login-illustration.png"
-                        alt="Meril Academy Illustration"
+                        alt="Meril Club Illustration"
                         fill
                         className="object-contain"
                         priority

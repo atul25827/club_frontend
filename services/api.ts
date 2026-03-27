@@ -1,8 +1,6 @@
-import { Academy, Hall, Booking, BookingStatsType, PaginatedResponse, MasterData, PendingAttendanceBooking } from "@/types";
+import { Country, State, ClubMasterData } from "@/types";
 import { API_ROUTES } from "./api-routes";
-import { clientFetch, getBaseUrl, mapAcademyData, DEFAULT_STATS } from "@/lib/client-fetcher";
-
-export type { Academy, Hall, Booking };
+import { clientFetch } from "@/lib/client-fetcher";
 
 export const api = {
     // ─── Auth ───────────────────────────────────────────────────────────────
@@ -36,211 +34,167 @@ export const api = {
         }
     },
 
-    // ─── Academy ────────────────────────────────────────────────────────────
+    // ─── Master Data ────────────────────────────────────────────────────────
 
-    async getAcademiesWithHalls(): Promise<Academy[]> {
+    async getClubMasterData(): Promise<ClubMasterData | null> {
         try {
-            const json = await clientFetch(API_ROUTES.academy.getAcademiesWithHalls, { skipAuth: true });
-            const rawData = json.message?.data || [];
-            return mapAcademyData(rawData, getBaseUrl());
-        } catch (error) {
-            console.error("Error fetching academies:", error);
-            return [];
-        }
-    },
-
-    // ─── Booking ────────────────────────────────────────────────────────────
-
-    async getCalendarBookings(start_date: string, end_date: string, academyId?: string, hallId?: string): Promise<Booking[]> {
-        const params: Record<string, string> = { start_date, end_date };
-        if (academyId && academyId !== "all") params.academy = academyId;
-        if (hallId && hallId !== "all") params.hall = hallId;
-
-        try {
-            const json = await clientFetch(API_ROUTES.booking.getCalendar, { params, skipAuth: true });
-            return json.message || [];
-        } catch (error) {
-            console.error("Error fetching calendar bookings:", error);
-            return [];
-        }
-    },
-
-    async createBooking(bookingData: any) {
-        return clientFetch(API_ROUTES.booking.create, {
-            method: "POST",
-            body: bookingData,
-        });
-    },
-
-    async getUserBookingStats(headers: Record<string, string> = {}): Promise<{ message: BookingStatsType }> {
-        try {
-            return await clientFetch(API_ROUTES.booking.getUserStats, { headers });
-        } catch (error) {
-            console.error("Error fetching booking stats:", error);
-            return { message: { ...DEFAULT_STATS } };
-        }
-    },
-
-    async getPaginatedBookings(
-        page: number = 1,
-        limit: number = 10,
-        filters: { academy?: string; hall?: string; status?: string } = {}
-    ): Promise<PaginatedResponse<Booking>> {
-        const params: Record<string, string> = {
-            page_number: page.toString(),
-            page_length: limit.toString(),
-        };
-        if (filters.academy && filters.academy !== "all") params.academy = filters.academy;
-        if (filters.hall && filters.hall !== "all") params.hall = filters.hall;
-        if (filters.status && filters.status !== "all") params.status = filters.status;
-
-        try {
-            const json = await clientFetch(API_ROUTES.booking.getList, { params });
+            const json = await clientFetch(API_ROUTES.clubMasterData.get);
             return json.message;
         } catch (error) {
-            console.error("Error fetching paginated bookings:", error);
-            return { data: [], total_count: 0, page_number: page, page_length: limit };
+            console.error("Error fetching club master data:", error);
+            return null;
+        }
+    },
+
+    async getCountries(search_name?: string): Promise<Country[]> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubMasterData.getCountries, {
+                params: search_name ? { search_name } : undefined,
+            });
+            console.log(json, "jsonjsonjsonjson");
+            const result = json.message?.data ?? json.message ?? [];
+            return Array.isArray(result) ? result : [];
+        } catch (error) {
+            console.error("Error fetching countries:", error);
+            return [];
+        }
+    },
+
+    async getStates(country: string): Promise<State[]> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubMasterData.getStates, {
+                params: { country },
+            });
+            const result = json.message?.data ?? json.message ?? [];
+            return Array.isArray(result) ? result : [];
+        } catch (error) {
+            console.error("Error fetching states:", error);
+            return [];
+        }
+    },
+
+    // ─── Club Booking ────────────────────────────────────────────────────────
+
+    async saveClubBooking(payload: Record<string, any>): Promise<any> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubBooking.create, {
+                method: "POST",
+                body: payload,
+            });
+            return json.message;
+        } catch (error) {
+            console.error("Error saving club booking:", error);
+            throw error;
+        }
+    },
+
+    async submitClubBooking(payload: Record<string, any>): Promise<any> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubBooking.submit, {
+                method: "POST",
+                body: payload,
+            });
+            return json.message;
+        } catch (error) {
+            console.error("Error submitting club booking:", error);
+            throw error;
+        }
+    },
+
+    async getClubBookingDetails(booking_id: string): Promise<any> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubBooking.getDetails, {
+                params: { club_booking_id: booking_id },
+            });
+            // Frappe responses can either map to json.data or json.message based on standard vs custom
+            const result = json.message.data;
+            return result;
+        } catch (error) {
+            console.error("Error fetching club booking details:", error);
+            return null;
+        }
+    },
+
+    async deleteChild(child_name: string): Promise<any> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubBooking.deleteChild, {
+                method: "POST",
+                body: { name: child_name },
+            });
+            return json.message ?? json.data;
+        } catch (error) {
+            console.error("Error deleting child entry:", error);
+            throw error;
+        }
+    },
+
+    async getClubBookingList(
+        page_number: number,
+        page_length: number,
+        filters: { status?: string; search_name?: string }
+    ): Promise<{ data: any[]; total_count: number }> {
+        try {
+            const params: any = { page_number, page_length };
+            if (filters.status && filters.status !== "all") params.status = filters.status;
+            if (filters.search_name) params.search_name = filters.search_name;
+
+            const json = await clientFetch(API_ROUTES.clubBooking.getList, { params });
+            const message = json.message || {};
+            return {
+                data: message.data || [],
+                total_count: message.total_count || 0,
+            };
+        } catch (error) {
+            console.error("Error fetching club booking list:", error);
+            return { data: [], total_count: 0 };
+        }
+    },
+
+    // ─── Approver Booking (existing - used by booking-list) ──────────────────
+
+    async getApproverBookingList(
+        page: number,
+        limit: number,
+        filters: { status?: string; academy?: string; hall?: string; search?: string }
+    ): Promise<{ data: any[]; total_count: number }> {
+        try {
+            const json = await clientFetch(API_ROUTES.booking.getApproverList, {
+                params: {
+                    page: String(page),
+                    limit: String(limit),
+                    ...(filters.status && filters.status !== "all" ? { status: filters.status } : {}),
+                    ...(filters.academy && filters.academy !== "all" ? { academy: filters.academy } : {}),
+                    ...(filters.hall && filters.hall !== "all" ? { hall: filters.hall } : {}),
+                    ...(filters.search ? { search: filters.search } : {}),
+                },
+            });
+            return { data: json.message?.data ?? [], total_count: json.message?.total_count ?? 0 };
+        } catch (error) {
+            console.error("Error fetching approver booking list:", error);
+            return { data: [], total_count: 0 };
         }
     },
 
     async exportBookings(
-        page: number = 1,
-        limit: number = 1000,
-        filters: { academy?: string; hall?: string; status?: string } = {}
-    ): Promise<PaginatedResponse<Booking>> {
-        const params: Record<string, string> = {
-            page_number: page.toString(),
-            page_length: limit.toString(),
-        };
-        if (filters.academy && filters.academy !== "all") params.academy = filters.academy;
-        if (filters.hall && filters.hall !== "all") params.hall = filters.hall;
-        if (filters.status && filters.status !== "all") params.status = filters.status;
-
+        page: number,
+        limit: number,
+        filters: { status?: string; academy?: string; hall?: string; search?: string }
+    ): Promise<{ data: any[]; total_count: number }> {
         try {
-            const json = await clientFetch(API_ROUTES.booking.getExport, { params });
-            return json.message;
-        } catch (error) {
-            console.error("Error fetching export bookings:", error);
-            return { data: [], total_count: 0, page_number: 1, page_length: 10 };
-        }
-    },
-
-    async getApproverStats(): Promise<BookingStatsType> {
-        try {
-            const json = await clientFetch(API_ROUTES.booking.getApproverStats);
-            return json.message;
-        } catch (error) {
-            console.error("Error fetching stats:", error);
-            return { ...DEFAULT_STATS };
-        }
-    },
-
-    async getApproverBookingList(
-        page: number = 1,
-        limit: number = 10,
-        filters: { status?: string; search?: string; academy?: string; hall?: string } = {}
-    ): Promise<PaginatedResponse<Booking>> {
-        const params: Record<string, string> = {
-            page_number: page.toString(),
-            page_length: limit.toString(),
-        };
-        if (filters.status && filters.status !== "all") params.status = filters.status;
-        if (filters.search) params.search_name = filters.search;
-        if (filters.academy && filters.academy !== "all") params.academy = filters.academy;
-        if (filters.hall && filters.hall !== "all") params.hall = filters.hall;
-
-        try {
-            const json = await clientFetch(API_ROUTES.booking.getApproverList, { params });
-            return {
-                data: json.message.data || [],
-                total_count: json.message.total_count,
-                page_number: json.message.page_number,
-                page_length: json.message.page_length,
-            };
-        } catch (error) {
-            console.error("Error fetching approver bookings:", error);
-            return { data: [], total_count: 0, page_number: page, page_length: limit };
-        }
-    },
-
-    async updateBookingStatus(bookingId: string, action: "Approve" | "Reject", remark?: string, requestType: "booking" | "cancel_request" = "booking"): Promise<any> {
-        return clientFetch(API_ROUTES.booking.updateStatus, {
-            method: "POST",
-            body: { booking_id: bookingId, action, remark, request_type: requestType },
-        });
-    },
-
-    async getUpcomingBookings(): Promise<any[]> {
-        try {
-            const json = await clientFetch(API_ROUTES.booking.getUpcoming);
-            return json.message || [];
-        } catch (error) {
-            console.error("Error fetching upcoming bookings", error);
-            return [];
-        }
-    },
-
-    async cancelBooking(bookingId: string, cancelComment: string): Promise<any> {
-        return clientFetch(API_ROUTES.booking.cancel, {
-            method: "POST",
-            body: { booking_id: bookingId, cancel_comment: cancelComment },
-        });
-    },
-
-    async updateBookingEventPlanning(bookingId: string, payload: { event_planning_data: any[]; no_of_participants?: number; no_of_participants_international?: number }): Promise<any> {
-        return clientFetch(API_ROUTES.booking.updateEventPlanning, {
-            method: "POST",
-            body: {
-                booking_id: bookingId,
-                event_planning_data: payload.event_planning_data,
-                no_of_participants: payload.no_of_participants,
-                no_of_participants_international: payload.no_of_participants_international,
-            },
-        });
-    },
-
-    async getBookingAuditTrail(bookingId: string): Promise<any[]> {
-        try {
-            const json = await clientFetch(API_ROUTES.booking.getAuditTrail, {
-                params: { booking_id: bookingId },
+            const json = await clientFetch(API_ROUTES.booking.getExport, {
+                params: {
+                    page: String(page),
+                    limit: String(limit),
+                    ...(filters.status && filters.status !== "all" ? { status: filters.status } : {}),
+                    ...(filters.academy && filters.academy !== "all" ? { academy: filters.academy } : {}),
+                    ...(filters.hall && filters.hall !== "all" ? { hall: filters.hall } : {}),
+                    ...(filters.search ? { search: filters.search } : {}),
+                },
             });
-            return json.message || [];
+            return { data: json.message?.data ?? [], total_count: json.message?.total_count ?? 0 };
         } catch (error) {
-            console.error("Error fetching audit trail", error);
-            return [];
-        }
-    },
-
-    async uploadAttendanceFiles(bookingId: string, files: File[]): Promise<any> {
-        const formData = new FormData();
-        formData.append("booking_id", bookingId);
-        files.forEach((file) => formData.append("files", file));
-
-        return clientFetch(API_ROUTES.booking.uploadAttendance, {
-            method: "POST",
-            formData,
-        });
-    },
-
-    async checkPendingAttendance(): Promise<PendingAttendanceBooking[]> {
-        try {
-            const json = await clientFetch(API_ROUTES.booking.checkPendingAttendance);
-            return json.message?.data || json.message || [];
-        } catch (error) {
-            console.error("Error checking pending attendance", error);
-            return [];
-        }
-    },
-
-    // ─── Master Data ────────────────────────────────────────────────────────
-
-    async getMasterData(): Promise<MasterData | null> {
-        try {
-            const json = await clientFetch(API_ROUTES.masterData.get);
-            return json.message;
-        } catch (error) {
-            console.error("Error fetching master data:", error);
-            return null;
+            console.error("Error exporting bookings:", error);
+            return { data: [], total_count: 0 };
         }
     },
 };
