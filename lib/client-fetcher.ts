@@ -1,5 +1,3 @@
-import { Academy } from "@/types";
-
 // ─── Base URL ───────────────────────────────────────────────────────────────
 
 export function getBaseUrl(): string {
@@ -121,25 +119,6 @@ export async function clientFetch(route: string, options: FetchOptions = {}): Pr
  * Maps raw Frappe academy data to typed Academy objects.
  * Shared between client-side and server-side APIs.
  */
-export function mapAcademyData(rawData: any[], baseUrl: string): Academy[] {
-    return rawData.map((item: any) => ({
-        id: item.name,
-        name: item.academy_name,
-        imageUrl: item.attachment
-            ? item.attachment.startsWith("http")
-                ? item.attachment
-                : `${baseUrl}${encodeURI(item.attachment)}`
-            : "",
-        halls: (item.halls || []).map((h: any) => ({
-            id: h.name,
-            name: h.hall_name,
-            academyId: h.academy_name,
-            capacity: h.capacity || 0,
-            wifi: h.wifi || 0,
-            screen: h.screen || 0,
-        })),
-    }));
-}
 
 // ─── Default Stats ──────────────────────────────────────────────────────────
 

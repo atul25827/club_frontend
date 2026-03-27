@@ -1,6 +1,5 @@
 import { Country, State, ClubMasterData } from "@/types";
 import { API_ROUTES } from "./api-routes";
-import { getBaseUrl, mapAcademyData } from "@/lib/client-fetcher";
 import { serverFetch } from "@/lib/server-fetcher";
 
 export const apiServer = {

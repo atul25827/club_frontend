@@ -1,5 +1,5 @@
 import * as XLSX from "xlsx";
-import { Booking } from "@/types";
+
 
 export const exportToExcel = (data: any[], fileName: string) => {
     const ws = XLSX.utils.json_to_sheet(data);
@@ -8,9 +8,9 @@ export const exportToExcel = (data: any[], fileName: string) => {
     XLSX.writeFile(wb, `${fileName}.xlsx`);
 };
 
-export const formatBookingForExport = (booking: Booking) => {
+export const formatBookingForExport = (booking: any) => {
     // Helper to format event planning details
-    const eventPlanningDetails = booking.event_planning?.map(plan =>
+    const eventPlanningDetails = booking.event_planning?.map((plan: any) =>
         `Date: ${plan.event_date}, Time: ${plan.event_start_time}-${plan.event_end_time}, Hall: ${plan.hall}, Type: ${plan.booking_type}`
     ).join(' | ') || "N/A";
 
