@@ -19,5 +19,9 @@ export const API_ROUTES = {
         getDetails: "/api/method/academy.api.club_booking.get_club_booking_details",
         deleteChild: "/api/method/academy.api.club_booking.delete_club_booking_item",
         getList: "/api/method/academy.api.club_booking.get_club_booking_list",
+        getUserStats: "/api/method/academy.api.club_booking.get_user_club_booking_stats",
+        getClubApproverStats: "/api/method/academy.api.club_booking.get_approver_club_stats",
+        getApproverList: "/api/method/academy.api.club_booking.get_approver_club_booking_list",
+        updateStatus: "/api/method/academy.api.club_booking.update_club_booking_status",
     },
 } as const;

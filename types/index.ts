@@ -11,10 +11,31 @@ export interface User {
 
 export interface BookingStatsType {
     total_bookings: number;
+    total_submitted: number;
     total_approved: number;
     total_pending: number;
     total_rejected: number;
-    total_cancel: number;
+    total_cancelled?: number;
+    total_cancel?: number; // compat
+}
+
+export interface ClubBookingSummary {
+    name: string;
+    club_booking_id: string;
+    event_name: string;
+    from_date: string;
+    to_date: string;
+    booking_status: string;
+    approval_status: string;
+    guest_region?: string;
+    is_submitted: number;
+    is_approved: number;
+    is_rejected: number;
+    is_cancelled: number;
+    creation: string;
+    owner: string;
+    full_name: string;
+    booking_id?: string; // mapping helper
 }
 
 export interface AuditLogEntry {

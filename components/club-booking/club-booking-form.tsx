@@ -3,8 +3,17 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, FileText, Utensils, BedDouble } from "lucide-react";
+import { Loader2, FileText, Utensils, BedDouble, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { Tab1EventInfo } from "./tab1-event-info";
 import { Tab2FoodCatering } from "./tab2-food-catering";
 import { Tab3Stay } from "./tab3-stay";
@@ -17,7 +26,7 @@ import type { Tab1FormData, FoodCateringEntry, StayEntry } from "@/types/club-bo
 // ─── Tab config ───────────────────────────────────────────────────────────────
 
 const TABS = [
-    { id: 1, label: "Event Information", icon: FileText, activeClass: "bg-[#dbeafe] text-[#155dfc]", indicatorClass: "bg-[#155dfc]" },
+    { id: 1, label: "Event Information", icon: FileText, activeClass: "bg-[#f3e8ff] text-[#7D3FD0]", indicatorClass: "bg-[#7D3FD0]" },
     { id: 2, label: "Food & Catering", icon: Utensils, activeClass: "bg-[#dcfce7] text-green-600", indicatorClass: "bg-green-500" },
     { id: 3, label: "Stay", icon: BedDouble, activeClass: "bg-[#ffedd4] text-orange-500", indicatorClass: "bg-orange-400" },
 ] as const;
@@ -49,8 +58,8 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
 
     // ── Load Booking Data ──────────────────────────────────────────────────────
-    const loadBooking = useCallback(async (id: string, restoreTab: boolean = false) => {
-        setIsLoading(true);
+    const loadBooking = useCallback(async (id: string, restoreTab: boolean = false, isBackground: boolean = false) => {
+        if (!isBackground) setIsLoading(true);
         try {
             const data = await api.getClubBookingDetails(id);
             console.log("data", data);
@@ -73,7 +82,7 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
                 }
             }
         } finally {
-            setIsLoading(false);
+            if (!isBackground) setIsLoading(false);
         }
     }, [searchParams]);
 
@@ -89,15 +98,20 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
 
     // ── Persist active tab in URL ──────────────────────────────────────────────
     const goToTab = useCallback((tab: number) => {
-        setActiveTab(tab);
+        if (tab > 1 && !bookingId) {
+            toast.error("Please complete Event Information first");
+            return;
+        }
+        setActiveTab(tab as 1 | 2 | 3);
         const params = new URLSearchParams(searchParams.toString());
         params.set("tab", String(tab));
         router.replace(`?${params.toString()}`, { scroll: false });
-    }, [router, searchParams]);
+    }, [router, searchParams, bookingId]);
 
     // ── Persist booking ID in URL ─────────────────────────────────────────────
     const persistBookingId = useCallback((id: string, tab: number = activeTab) => {
         setBookingId(id);
+        setActiveTab(tab as 1 | 2 | 3);
         const params = new URLSearchParams(searchParams.toString());
         params.set("bid", encryptId(id));
         params.set("tab", String(tab));
@@ -138,10 +152,7 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
 
             if (id) {
                 persistBookingId(id, 2);
-                await loadBooking(id);
-                goToTab(2);
-            } else {
-                goToTab(2);
+                await loadBooking(id, false, true); // Silent refresh
             }
             toast.success(bookingId ? "Booking updated" : "Booking created");
         } catch (err: any) {
@@ -163,7 +174,7 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
             };
             await api.saveClubBooking(payload);
             toast.success("Food & catering entry saved");
-            if (bookingId) await loadBooking(bookingId);
+            if (bookingId) await loadBooking(bookingId, false, true);
         } catch (err: any) {
             toast.error(err?.message ?? "Failed to save food entry");
         } finally {
@@ -176,10 +187,10 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
         try {
             await api.deleteChild(childId);
             toast.success("Entry removed");
-            if (bookingId) await loadBooking(bookingId);
+            if (bookingId) await loadBooking(bookingId, false, true);
         } catch (err: any) {
             toast.error(err?.message ?? "Failed to remove entry");
-            if (bookingId) await loadBooking(bookingId); // Re-sync just in case
+            if (bookingId) await loadBooking(bookingId, false, true); // Re-sync just in case
         } finally {
             setIsSubmitting(false);
         }
@@ -194,7 +205,7 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
             };
             await api.saveClubBooking(payload);
             toast.success("Stay entry saved");
-            if (bookingId) await loadBooking(bookingId);
+            if (bookingId) await loadBooking(bookingId, false, true);
         } catch (err: any) {
             toast.error(err?.message ?? "Failed to save stay entry");
         } finally {
@@ -207,10 +218,10 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
         try {
             await api.deleteChild(childId);
             toast.success("Entry removed");
-            if (bookingId) await loadBooking(bookingId);
+            if (bookingId) await loadBooking(bookingId, false, true);
         } catch (err: any) {
             toast.error(err?.message ?? "Failed to remove entry");
-            if (bookingId) await loadBooking(bookingId);
+            if (bookingId) await loadBooking(bookingId, false, true);
         } finally {
             setIsSubmitting(false);
         }
@@ -250,7 +261,7 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
     if (isLoading) {
         return (
             <div className="flex items-center justify-center py-24">
-                <Loader2 className="w-8 h-8 animate-spin text-[#155dfc]" />
+                <Loader2 className="w-8 h-8 animate-spin text-[#7D3FD0]" />
                 <span className="ml-3 text-[#6a7282]">Loading booking...</span>
             </div>
         );
@@ -260,21 +271,32 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
         <div className="flex flex-col gap-8 w-full p-2">
             {/* ── Tab Navigation ── */}
             <div className="flex items-center gap-8 border-b border-[#d9d9d9] pb-4 relative">
-                {TABS.map(({ id, label, icon: Icon, activeClass, indicatorClass }) => (
-                    <button
-                        key={id}
-                        onClick={() => goToTab(id)}
-                        className={`flex items-center gap-4 relative pb-4 -mb-4 ${activeTab === id ? "text-[#101828]" : "text-[#6a7282]"}`}
-                    >
-                        <div className={`p-2 rounded-[10px] w-9 h-6 flex items-center justify-center ${activeTab === id ? activeClass : "bg-gray-100 text-gray-500"}`}>
-                            <Icon className="w-4 h-4" />
-                        </div>
-                        <span className="font-medium text-[20px]">{label}</span>
-                        {activeTab === id && (
-                            <div className={`absolute bottom-0 left-0 right-0 h-1 ${indicatorClass} rounded-t-full`} />
-                        )}
-                    </button>
-                ))}
+                {TABS.map(({ id, label, icon: Icon, activeClass, indicatorClass }) => {
+                    const isDisabled = id > 1 && !bookingId;
+                    return (
+                        <button
+                            key={id}
+                            disabled={isDisabled}
+                            onClick={() => goToTab(id)}
+                            className={cn(
+                                "flex items-center gap-4 relative pb-4 -mb-4 transition-all",
+                                activeTab === id ? "text-[#101828]" : "text-[#6a7282]",
+                                isDisabled ? "opacity-40 cursor-not-allowed grayscale" : "cursor-pointer"
+                            )}
+                        >
+                            <div className={cn(
+                                "p-2 rounded-[10px] w-9 h-6 flex items-center justify-center transition-colors",
+                                activeTab === id ? activeClass : "bg-gray-100 text-gray-500"
+                            )}>
+                                <Icon className="w-4 h-4" />
+                            </div>
+                            <span className="font-medium text-[20px]">{label}</span>
+                            {activeTab === id && (
+                                <div className={`absolute bottom-0 left-0 right-0 h-1 ${indicatorClass} rounded-t-full`} />
+                            )}
+                        </button>
+                    )
+                })}
             </div>
 
             {/* ── Form Content ── */}
@@ -326,7 +348,7 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
                     <Button
                         onClick={handleNext}
                         disabled={isSubmitting}
-                        className="cursor-pointer bg-[#155dfc] hover:bg-blue-700 text-white font-medium text-[16px] px-8 py-3 rounded-[8px] w-[140px] h-[52px]"
+                        className="cursor-pointer bg-[#7D3FD0] hover:bg-[#6a2eb8] text-white font-medium text-[16px] px-8 py-3 rounded-[8px] w-[140px] h-[52px] shadow-lg shadow-purple-100"
                     >
                         {isSubmitting ? (
                             <span className="flex items-center gap-2">
@@ -337,48 +359,56 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
                 ) : (
                     <Button
                         onClick={() => setShowConfirmModal(true)}
-                        disabled={isSubmitting}
-                        className="cursor-pointer bg-[#155dfc] hover:bg-blue-700 text-white font-medium text-[16px] px-8 py-3 rounded-[8px] h-[52px]"
+                        disabled={isSubmitting || !bookingId}
+                        className="cursor-pointer bg-[#7D3FD0] hover:bg-[#6a2eb8] text-white font-medium text-[16px] px-8 py-3 rounded-[8px] h-[52px] shadow-lg shadow-purple-100 disabled:opacity-50 disabled:grayscale"
                     >
                         Submit
                     </Button>
                 )}
             </div>
 
-            {/* ── Confirmation Modal ── */}
-            {showConfirmModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 animate-in fade-in">
-                    <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 animate-in zoom-in-95">
-                        <h3 className="text-[20px] font-bold text-gray-900 mb-2">Submit Booking</h3>
-                        <p className="text-gray-500 mb-6 text-[15px]">
-                            Are you sure you want to finalize and submit this booking? Ensure all details (food, stay, and event info) are correct as this action goes to the next approval stage.
-                        </p>
-                        <div className="flex gap-3 justify-end">
+            {/* ── Submission Confirmation Dialog ── */}
+            <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
+                <DialogContent className="sm:max-w-[400px] rounded-2xl p-0 overflow-hidden border-none shadow-2xl">
+                    <div className="bg-[#7D3FD0] h-2 w-full" />
+                    <div className="p-6 pt-4">
+                        <DialogHeader>
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="p-2 bg-purple-50 rounded-lg">
+                                    <CheckCircle2 className="w-5 h-5 text-[#7D3FD0]" />
+                                </div>
+                                <DialogTitle className="text-xl font-bold text-gray-900">Ready to Submit?</DialogTitle>
+                            </div>
+                            <DialogDescription className="text-gray-500 text-[14px] leading-relaxed">
+                                You are about to finalize this booking. Please ensure all details are correct as this will initiate the approval workflow.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="mt-8 gap-3 sm:justify-end">
                             <Button 
-                                variant="outline" 
+                                variant="ghost" 
                                 onClick={() => setShowConfirmModal(false)}
                                 disabled={isSubmitting}
-                                className="border-[#e5e7eb] text-[#364153]"
+                                className="text-gray-500 font-bold hover:bg-gray-50 rounded-xl px-6 h-11"
                             >
-                                Cancel
+                                Not yet
                             </Button>
                             <Button 
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="bg-[#155dfc] hover:bg-blue-700 text-white min-w-[140px]"
+                                className="bg-[#7D3FD0] hover:bg-[#6a2eb8] text-white font-bold rounded-xl px-8 h-11 min-w-[140px] shadow-lg shadow-purple-200 transition-all active:scale-95"
                             >
                                 {isSubmitting ? (
                                     <span className="flex items-center gap-2">
-                                         <Loader2 className="w-4 h-4 animate-spin" /> Submitting
+                                         <Loader2 className="w-4 h-4 animate-spin" /> Finalizing
                                     </span>
                                 ) : (
-                                    "Confirm & Submit"
+                                    "Yes, Submit"
                                 )}
                             </Button>
-                        </div>
+                        </DialogFooter>
                     </div>
-                </div>
-            )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

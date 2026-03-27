@@ -121,19 +121,19 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6">
 
                 <Field label="Distributors/Guest Name" required error={errors.distributor_or_guest_name}>
-                    <Input placeholder="Deepak Mathur" value={draft.distributor_or_guest_name}
+                    <Input placeholder="Enter Name" value={draft.distributor_or_guest_name}
                         onChange={(e) => set("distributor_or_guest_name", e.target.value)}
                         className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                 </Field>
 
                 <Field label="Designation" error={errors.designation}>
-                    <Input placeholder="Doctor" value={draft.designation}
+                    <Input placeholder="Enter Designation" value={draft.designation}
                         onChange={(e) => set("designation", e.target.value)}
                         className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                 </Field>
 
                 <Field label="Firm/Hospital Name" error={errors.firm_or_hospital_name}>
-                    <Input placeholder="Atul Hospital" value={draft.firm_or_hospital_name}
+                    <Input placeholder="Enter Firm/Hospital Name" value={draft.firm_or_hospital_name}
                         onChange={(e) => set("firm_or_hospital_name", e.target.value)}
                         className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                 </Field>
@@ -192,7 +192,7 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
                             type="button"
                             onClick={handleAdd}
                             disabled={isSubmitting}
-                            className="h-[42px] w-[42px] shrink-0 bg-[#155dfc] hover:bg-blue-700 p-0 rounded-[8px]"
+                            className="h-[42px] w-[42px] shrink-0 bg-[#7D3FD0] hover:bg-[#6a2eb8] p-0 rounded-[8px]"
                         >
                             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-6 w-6" />}
                         </Button>

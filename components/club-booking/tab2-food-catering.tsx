@@ -411,7 +411,7 @@ export function Tab2FoodCatering({
                             type="button"
                             onClick={handleAdd}
                             disabled={isSubmitting}
-                            className="h-[42px] w-[42px] shrink-0 bg-[#155dfc] hover:bg-blue-700 p-0 rounded-[8px]"
+                            className="h-[42px] w-[42px] shrink-0 bg-[#7D3FD0] hover:bg-[#6a2eb8] p-0 rounded-[8px]"
                         >
                             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-6 w-6" />}
                         </Button>
@@ -421,8 +421,8 @@ export function Tab2FoodCatering({
 
             {/* Day Wise List Table */}
             <div className="flex flex-col gap-4 mt-2">
-                <div className="flex items-center gap-3 mb-2 border-b border-[#155dfc] pb-2">
-                    <div className="bg-[#e0e7ff] text-[#155dfc] p-1.5 rounded-[8px]">
+                <div className="flex items-center gap-3 mb-2 border-b border-[#7D3FD0] pb-2">
+                    <div className="bg-purple-50 text-[#7D3FD0] p-1.5 rounded-[8px]">
                         <Calendar className="w-5 h-5" />
                     </div>
                     <h3 className="text-[18px] font-medium text-[#101828]">Day Wise List</h3>
@@ -441,7 +441,6 @@ export function Tab2FoodCatering({
                                     <TableHead className="font-medium text-[#364153]">Booking For</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Day</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Guest Name</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Total Guests</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Designation</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Firm/Hospital</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Repeat Guest</TableHead>
@@ -449,6 +448,7 @@ export function Tab2FoodCatering({
                                     <TableHead className="font-medium text-[#364153]">Country</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Food Pref.</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Meal Type</TableHead>
+                                    <TableHead className="font-medium text-[#364153]">Total Guests</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Veg</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Non-Veg</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Jain</TableHead>
@@ -463,7 +463,6 @@ export function Tab2FoodCatering({
                                         <TableCell className="text-[#6a7282] font-medium">{entry.booking_for || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.day || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.distributor_or_guest_name || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.total_no_of_guest || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.designation || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.firm_or_hospital_name || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.repeat_guest || "-"}</TableCell>
@@ -471,6 +470,7 @@ export function Tab2FoodCatering({
                                         <TableCell className="text-[#6a7282]">{entry.country || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.food_preferences || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.meal_type || "-"}</TableCell>
+                                        <TableCell className="text-[#6a7282]">{entry.total_no_of_guest || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.veg || "0"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.non_veg || "0"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.jain || "0"}</TableCell>

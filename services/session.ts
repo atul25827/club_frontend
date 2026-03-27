@@ -36,8 +36,6 @@ export async function getSession(cookieHeader: string): Promise<SessionResult> {
 
         const userData = await userRes.json();
         const profile = userData.message;
-        console.log(userData, "userDatauserDatauserData")
-
         if (!profile || !profile.user_id) {
             return { user: null, role: null };
         }

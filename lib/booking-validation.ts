@@ -51,7 +51,7 @@ export interface Tab2Draft {
 
 export function validateTab2Draft(data: Tab2Draft): ValidationError[] {
     const errors: ValidationError[] = [];
-    const hasGuestDetails = data.booking_for === "Club";
+    const hasGuestDetails = data.booking_for === "Club" || data.booking_for === "Club House" || data.booking_for === "Guest";
 
     if (!data.booking_for)
         errors.push({ field: "booking_for", message: "Booking For is required" });
@@ -71,6 +71,23 @@ export function validateTab2Draft(data: Tab2Draft): ValidationError[] {
     } else {
         if (!data.total_no_of_guest || Number(data.total_no_of_guest) <= 0)
             errors.push({ field: "total_no_of_guest", message: "Total guests must be a positive number" });
+    }
+
+    // New validation: Guest count sums
+    let total = Number(data.total_no_of_guest) || 0;
+    if (hasGuestDetails && total === 0) total = 1; // Default to 1 guest for Club/Guest mode
+    
+    const v = Number(data.veg) || 0;
+    const nv = Number(data.non_veg) || 0;
+    const j = Number(data.jain) || 0;
+    const o = Number(data.other) || 0;
+    const sum = v + nv + j + o;
+
+    if (total > 0 && sum > total) {
+        errors.push({ 
+            field: hasGuestDetails ? "veg" : "total_no_of_guest", 
+            message: `Sum (${sum}) cannot exceed ${total} guest(s)` 
+        });
     }
 
     if (data.stay_required) {

@@ -131,7 +131,7 @@ export const api = {
     async getClubBookingList(
         page_number: number,
         page_length: number,
-        filters: { status?: string; search_name?: string }
+        filters: { status?: string; search_name?: string } = {}
     ): Promise<{ data: any[]; total_count: number }> {
         try {
             const params: any = { page_number, page_length };
@@ -150,51 +150,92 @@ export const api = {
         }
     },
 
-    // ─── Approver Booking (existing - used by booking-list) ──────────────────
+    async getUserClubBookingStats(): Promise<any> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubBooking.getUserStats);
+            return json.message;
+        } catch (error) {
+            console.error("Error fetching user club booking stats:", error);
+            return null;
+        }
+    },
 
-    async getApproverBookingList(
-        page: number,
-        limit: number,
-        filters: { status?: string; academy?: string; hall?: string; search?: string }
+    async getApproverClubStats(): Promise<any> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubBooking.getClubApproverStats);
+            return json.message;
+        } catch (error) {
+            console.error("Error fetching approver club booking stats:", error);
+            return null;
+        }
+    },
+
+    async getApproverClubBookingList(
+        page_number: number,
+        page_length: number,
+        filters: { status?: string; search_name?: string } = {}
     ): Promise<{ data: any[]; total_count: number }> {
         try {
-            const json = await clientFetch(API_ROUTES.booking.getApproverList, {
-                params: {
-                    page: String(page),
-                    limit: String(limit),
-                    ...(filters.status && filters.status !== "all" ? { status: filters.status } : {}),
-                    ...(filters.academy && filters.academy !== "all" ? { academy: filters.academy } : {}),
-                    ...(filters.hall && filters.hall !== "all" ? { hall: filters.hall } : {}),
-                    ...(filters.search ? { search: filters.search } : {}),
-                },
-            });
-            return { data: json.message?.data ?? [], total_count: json.message?.total_count ?? 0 };
+            const params: any = { page_number, page_length };
+            if (filters.status && filters.status !== "all") params.status = filters.status;
+            if (filters.search_name) params.search_name = filters.search_name;
+
+            const json = await clientFetch(API_ROUTES.clubBooking.getApproverList, { params });
+            const message = json.message || {};
+            return {
+                data: message.data || [],
+                total_count: message.total_count || 0,
+            };
         } catch (error) {
-            console.error("Error fetching approver booking list:", error);
+            console.error("Error fetching approver club booking list:", error);
             return { data: [], total_count: 0 };
         }
     },
 
-    async exportBookings(
-        page: number,
-        limit: number,
-        filters: { status?: string; academy?: string; hall?: string; search?: string }
-    ): Promise<{ data: any[]; total_count: number }> {
+    async updateClubBookingStatus(club_booking_id: string, action: string, remark: string): Promise<any> {
         try {
-            const json = await clientFetch(API_ROUTES.booking.getExport, {
-                params: {
-                    page: String(page),
-                    limit: String(limit),
-                    ...(filters.status && filters.status !== "all" ? { status: filters.status } : {}),
-                    ...(filters.academy && filters.academy !== "all" ? { academy: filters.academy } : {}),
-                    ...(filters.hall && filters.hall !== "all" ? { hall: filters.hall } : {}),
-                    ...(filters.search ? { search: filters.search } : {}),
-                },
+            const json = await clientFetch(API_ROUTES.clubBooking.updateStatus, {
+                method: "POST",
+                body: { club_booking_id, action, remark },
             });
-            return { data: json.message?.data ?? [], total_count: json.message?.total_count ?? 0 };
+            return json.message;
         } catch (error) {
-            console.error("Error exporting bookings:", error);
-            return { data: [], total_count: 0 };
+            console.error("Error updating club booking status:", error);
+            throw error;
         }
     },
+
+    async getClubApproverStats(): Promise<any> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubBooking.getClubApproverStats);
+            console.log("json json.message", json.message);
+            return json.message;
+        } catch (error) {
+            console.error("Error fetching academy approver stats:", error);
+            return null;
+        }
+    },
+
+    // async exportBookings(
+    //     page: number,
+    //     limit: number,
+    //     filters: { status?: string; academy?: string; hall?: string; search?: string }
+    // ): Promise<{ data: any[]; total_count: number }> {
+    //     try {
+    //         const json = await clientFetch(API_ROUTES.booking.getExport, {
+    //             params: {
+    //                 page: String(page),
+    //                 limit: String(limit),
+    //                 ...(filters.status && filters.status !== "all" ? { status: filters.status } : {}),
+    //                 ...(filters.academy && filters.academy !== "all" ? { academy: filters.academy } : {}),
+    //                 ...(filters.hall && filters.hall !== "all" ? { hall: filters.hall } : {}),
+    //                 ...(filters.search ? { search: filters.search } : {}),
+    //             },
+    //         });
+    //         return { data: json.message?.data ?? [], total_count: json.message?.total_count ?? 0 };
+    //     } catch (error) {
+    //         console.error("Error exporting bookings:", error);
+    //         return { data: [], total_count: 0 };
+    //     }
+    // },
 };

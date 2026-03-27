@@ -38,7 +38,7 @@ const GUEST_REGIONS = ["Domestics", "International", "North", "South", "East", "
 
 export function Tab1EventInfo({ data, errors, onChange }: Tab1Props) {
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8 max-w-[1200px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8">
             {/* Guest Region */}
             <Field label="Guest Region" error={errors.guest_region}>
                 <Select value={data.guest_region} onValueChange={(v) => onChange("guest_region", v)}>
@@ -58,7 +58,7 @@ export function Tab1EventInfo({ data, errors, onChange }: Tab1Props) {
             {/* Event Name */}
             <Field label="Event Name" required error={errors.event_name}>
                 <Input
-                    placeholder="Dhoni Event"
+                    placeholder="Event Name"
                     value={data.event_name}
                     onChange={(e) => onChange("event_name", e.target.value)}
                     className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]"

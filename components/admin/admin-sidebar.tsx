@@ -22,11 +22,11 @@ const sidebarItems = [
         href: "/club-booking",
         icon: ClipboardList,
     },
-    {
-        title: "Reports",
-        href: "/calendar",
-        icon: Calendar,
-    },
+    // {
+    //     title: "Reports",
+    //     href: "/calendar",
+    //     icon: Calendar,
+    // },
 ];
 
 export function AdminSidebar() {

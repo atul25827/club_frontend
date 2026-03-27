@@ -44,10 +44,10 @@ export function AdminHeader({ title }: AdminHeaderProps) {
                     <DropdownMenuContent align="end" className="w-56">
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="cursor-pointer">
+                        {/* <DropdownMenuItem className="cursor-pointer">
                             <KeyRound className="mr-2 h-4 w-4" />
                             <span>Change Password</span>
-                        </DropdownMenuItem>
+                        </DropdownMenuItem> */}
                         <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600" onClick={logout}>
                             <LogOut className="mr-2 h-4 w-4" />
                             <span>Log out</span>
