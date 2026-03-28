@@ -37,11 +37,11 @@ export async function POST(request: Request) {
         };
 
         const sessionToken = await encryptSession(sessionPayload);
-
+        const isSecure = process.env.NEXT_PUBLIC_NODE_ENV === "production" ? true : false;
         // Set the secure, HttpOnly, encrypted role cookie
         cookieStore.set("app_session", sessionToken, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
+            secure: isSecure,
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60, // 7 days (matching standard Frappe sid length typically)
             path: "/",

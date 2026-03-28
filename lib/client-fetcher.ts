@@ -1,6 +1,13 @@
 // ─── Base URL ───────────────────────────────────────────────────────────────
 
 export function getBaseUrl(): string {
+    if (typeof window !== "undefined") {
+        // Client-side: use relative URL so Next.js rewrites can handle proxying
+        // This solves cross-origin & third-party Cookie rejections.
+        return "";
+    }
+    
+    // Server-side: requires absolute URL
     const url = process.env.NEXT_PUBLIC_FRAPPE_URL;
     if (!url) throw new Error("NEXT_PUBLIC_FRAPPE_URL is not defined");
     return url;
