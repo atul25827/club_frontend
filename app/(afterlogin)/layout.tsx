@@ -9,7 +9,7 @@ export default async function AdminLayout({
 }) {
     // 🔐 SSR Protection: validates session against Frappe backend
     // Allows access for any authenticated user, regardless of specific role
-    // await requireAuth();
+    await requireAuth();
     return (
         <AdminLayoutContent>{children}</AdminLayoutContent>
     );

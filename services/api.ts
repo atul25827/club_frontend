@@ -51,7 +51,6 @@ export const api = {
             const json = await clientFetch(API_ROUTES.clubMasterData.getCountries, {
                 params: search_name ? { search_name } : undefined,
             });
-            console.log(json, "jsonjsonjsonjson");
             const result = json.message?.data ?? json.message ?? [];
             return Array.isArray(result) ? result : [];
         } catch (error) {

@@ -25,7 +25,6 @@ export function DynamicDashboardSection({ definition }: DynamicDashboardSectionP
     const [stats, setStats] = useState<BookingStatsType | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
-    console.log("inside dahsbiard oage states ")
 
     useEffect(() => {
         const fetchData = async () => {

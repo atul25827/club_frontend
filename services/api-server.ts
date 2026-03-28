@@ -6,7 +6,6 @@ export const apiServer = {
     async getClubMasterData(): Promise<ClubMasterData | null> {
         try {
             const json = await serverFetch(API_ROUTES.clubMasterData.get);
-            console.log(json, "jsonjsonjsonjson");
             return json.message?.data || json.message || [];
         } catch (error) {
             console.error("Error fetching master data:", error);
