@@ -30,35 +30,35 @@ export async function middleware(request: NextRequest) {
     }
 
     // Define guarded route patterns
-    // const protectedRoutes = ['/dashboard', '/club-booking', '/club-booking/', '/club-booking-list', '/club-booking-list/'];
+    const protectedRoutes = ['/dashboard', '/club-booking', '/club-booking/', '/club-booking-list', '/club-booking-list/'];
 
-    // const isProtectedRoute = protectedRoutes.some(route =>
-    // pathname === route || pathname.startsWith(`${route}/`)
-    // );
+    const isProtectedRoute = protectedRoutes.some(route =>
+        pathname === route || pathname.startsWith(`${route}/`)
+    );
 
-    //  Not logged in or tampered JWT → redirect to login
-    // if (!isValidSession && isProtectedRoute) {
-    // const loginUrl = new URL('/login', request.url);
-    // loginUrl.searchParams.set('redirect', pathname);
-    // const response = NextResponse.redirect(loginUrl);
-    // Wipe invalid cookies immediately
-    // response.cookies.delete('app_session');
-    // response.cookies.delete('role');
-    // return response;
-    // }
+    // ❌ Not logged in or tampered JWT → redirect to login
+    if (!isValidSession && isProtectedRoute) {
+        const loginUrl = new URL('/login', request.url);
+        loginUrl.searchParams.set('redirect', pathname);
+        const response = NextResponse.redirect(loginUrl);
+        // Wipe invalid cookies immediately
+        response.cookies.delete('app_session');
+        response.cookies.delete('role');
+        return response;
+    }
 
     // Default page redirection
-    // if (pathname === '/') {
-    // if (isValidSession) {
-    // return NextResponse.redirect(new URL('/dashboard', request.url));
-    // }
-    // return NextResponse.redirect(new URL('/login', request.url));
-    // }
+    if (pathname === '/') {
+        if (isValidSession) {
+            return NextResponse.redirect(new URL('/dashboard', request.url));
+        }
+        return NextResponse.redirect(new URL('/login', request.url));
+    }
 
     // Prevent authenticated users from visiting login page
-    // if (pathname === '/login' && isValidSession) {
-    // return NextResponse.redirect(new URL('/dashboard', request.url));
-    // }
+    if (pathname === '/login' && isValidSession) {
+        return NextResponse.redirect(new URL('/dashboard', request.url));
+    }
 
     return NextResponse.next();
 }
