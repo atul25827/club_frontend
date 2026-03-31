@@ -66,7 +66,7 @@ export function DynamicDashboardSection({ definition }: DynamicDashboardSectionP
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-[24px] font-medium text-[#271E4A] font-poppins">{definition.listTitle}</h2>
                     <Link href={definition.viewAllHref}>
-                        <Button variant="outline" className="bg-[#EDF2FA] text-[#271E4A] border-none hover:bg-slate-200">
+                        <Button variant="outline" className=" cursor-pointer bg-[#EDF2FA] text-[#271E4A] border-none hover:bg-slate-200">
                             View List
                         </Button>
                     </Link>

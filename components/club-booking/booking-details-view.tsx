@@ -84,6 +84,21 @@ export function BookingDetailsView({ booking }: { booking: any }) {
         }
     };
 
+    /** Handles comma-separated date strings (e.g. "2026-04-01, 2026-04-02") */
+    const formatDates = (dateStr: string) => {
+        if (!dateStr) return "—";
+        // If it contains commas, split and format each date individually
+        if (dateStr.includes(",")) {
+            return dateStr
+                .split(",")
+                .map((d) => d.trim())
+                .filter(Boolean)
+                .map((d) => formatDate(d))
+                .join(", ");
+        }
+        return formatDate(dateStr);
+    };
+
     const getStayType = (item: any) => {
         const isStay = item.is_stay || item.stay_required;
         const isFood = item.is_food === 1 || item.booking_for;
@@ -170,7 +185,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                     label="Approval Status"
                     value={
                         <span className={cn(
-                            "font-bold text-[14px]",
+                            "font-normal text-[14px]",
                             booking?.approval_status?.toLowerCase().includes("awaiting") ? "text-orange-600" : "text-[#101828]"
                         )}>
                             {approvalStatusText}
@@ -324,7 +339,9 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                     {foodList.map((food: any, idx: number) => (
                                         <TableRow key={idx} className="hover:bg-slate-50 border-gray-50 transition-colors h-12">
                                             <TableCell className="text-gray-600 font-medium text-[13px] px-4">{food.booking_for || "—"}</TableCell>
-                                            <TableCell className="font-bold text-[#101828] text-[13px] py-2 px-4 whitespace-nowrap">{formatDate(food.day)}</TableCell>
+                                            <TableCell className="font-bold text-[#101828] text-[13px] py-2 px-4">
+                                                <span className="whitespace-pre-line">{formatDates(food.day)}</span>
+                                            </TableCell>
                                             <TableCell className="text-gray-600 text-[13px] px-4 font-semibold">{food.distributor_or_guest_name || "—"}</TableCell>
                                             <TableCell className="font-bold text-green-700 text-[14px] px-4 text-center">{food.total_no_of_guest || 0}</TableCell>
                                             <TableCell className="text-gray-500 text-[13px] px-4 whitespace-nowrap">{food.designation || "—"}</TableCell>
@@ -341,7 +358,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                             <TableCell className="text-gray-500 text-[13px] px-4 whitespace-nowrap">{food.country || "—"}</TableCell>
                                             <TableCell className="text-gray-600 text-[12px] whitespace-nowrap px-4">{food.food_preferences || "—"}</TableCell>
                                             <TableCell className="text-[12px] px-4">
-                                                <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                                                <span className="bg-green-50 text-blue-400 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
                                                     {food.meal_type || "—"}
                                                 </span>
                                             </TableCell>
@@ -369,7 +386,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                 <div key={idx} className="border border-gray-100 rounded-xl p-4 space-y-3 shadow-sm bg-gray-50/10">
                                     <div className="flex justify-between items-center">
                                         <div className="flex flex-col">
-                                            <span className="font-bold text-[#101828] text-[14px]">{formatDate(food.day)}</span>
+                                            <span className="font-bold text-[#101828] text-[14px]">{formatDates(food.day)}</span>
                                             <span className="text-[11px] text-gray-500 uppercase">{food.booking_for || "Booking"}</span>
                                         </div>
                                         <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest">

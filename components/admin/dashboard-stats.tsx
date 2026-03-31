@@ -24,13 +24,13 @@ export function DashboardStats({ stats, cards }: DashboardStatsProps) {
                     <div
                         key={index}
                         className={cn(
-                            "rounded-[16px] p-6 flex items-center gap-5 shadow-sm transition-transform hover:scale-[1.02] cursor-pointer",
+                            "rounded-[16px] p-4 flex items-center gap-5 shadow-sm transition-transform hover:scale-[1.02] cursor-pointer",
                             card.bgClass
                         )}
                     >
-                        <card.icon className={cn("w-10 h-10", card.iconClass)} strokeWidth={1.5} />
+                        <card.icon className={cn("w-8 h-8", card.iconClass)} strokeWidth={1.5} />
                         <div className="flex flex-col">
-                            <span className={cn("text-3xl font-bold tracking-tight", card.textClass)}>
+                            <span className={cn("text-2xl font-bold tracking-tight", card.textClass)}>
                                 {value}
                             </span>
                             <span className={cn("text-base font-medium opacity-90", card.textClass)}>

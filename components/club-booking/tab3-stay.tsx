@@ -219,7 +219,7 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
                         <Table>
                             <TableHeader className="bg-[#f8f9fa]">
                                 <TableRow>
-                                    <TableHead className="font-medium text-[#364153]">Sr.</TableHead>
+                                    {/* <TableHead className="font-medium text-[#364153]">Sr.</TableHead> */}
                                     <TableHead className="font-medium text-[#364153]">Guest Name</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Designation</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Hospital/Firm</TableHead>
@@ -228,13 +228,14 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
                                     <TableHead className="font-medium text-[#364153]">Repeat</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Country</TableHead>
                                     <TableHead className="font-medium text-[#364153]">State</TableHead>
+                                    <TableHead className="font-medium text-[#364153]">Remark</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Action</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {entries.map((entry, idx) => (
                                     <TableRow key={entry.name || String(idx)} className="bg-white">
-                                        <TableCell className="text-[#6a7282]">{idx + 1}</TableCell>
+                                        {/* <TableCell className="text-[#6a7282]">{idx + 1}</TableCell> */}
                                         <TableCell className="text-[#6a7282] font-medium">{entry.distributor_or_guest_name}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.designation || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.firm_or_hospital_name || "-"}</TableCell>
@@ -248,7 +249,7 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
                                             <button
                                                 type="button"
                                                 onClick={() => entry.name && onRemove(entry.name)}
-                                                className="text-gray-400 hover:text-red-500 transition-colors"
+                                                className="cursor-pointer text-red-500 hover:text-red-50 transition-colors"
                                                 title="Remove entry"
                                             >
                                                 <Trash2 className="w-4 h-4" />
