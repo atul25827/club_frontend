@@ -10,7 +10,7 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { Plus, Calendar, Trash2, Loader2 } from "lucide-react";
 import { api } from "@/services/api";
-import { generateDayOptions } from "@/lib/date-utils";
+import { generateDayOptions, toFrappeDatetime } from "@/lib/date-utils";
 import { validateTab2Draft, toErrorMap, type Tab2Draft } from "@/lib/booking-validation";
 import type { FoodCateringEntry, DayOption } from "@/types/club-booking.types";
 import type { ClubMasterData, Country, State } from "@/types";
@@ -179,8 +179,8 @@ export function Tab2FoodCatering({
             other: draft.other ? Number(draft.other) : undefined,
             is_stay: draft.stay_required ? 1 : 0,
             is_food: 1,
-            check_in_date: draft.check_in_date || undefined,
-            check_out_date: draft.check_out_date || undefined,
+            check_in_date: toFrappeDatetime(draft.check_in_date) || undefined,
+            check_out_date: toFrappeDatetime(draft.check_out_date) || undefined,
             remark: draft.remark,
         };
 
@@ -414,13 +414,13 @@ export function Tab2FoodCatering({
                 {/* Stay dates */}
                 {draft.stay_required && hasGuestDetails && (
                     <>
-                        <Field label="Check-in Date" required error={errors.check_in_date}>
-                            <Input type="date" value={draft.check_in_date}
+                        <Field label="Check In Date and Time" required error={errors.check_in_date}>
+                            <Input type="datetime-local" value={draft.check_in_date}
                                 onChange={(e) => set("check_in_date", e.target.value)}
                                 className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                         </Field>
-                        <Field label="Check-out Date" required error={errors.check_out_date}>
-                            <Input type="date" value={draft.check_out_date}
+                        <Field label="Check Out Date Time" required error={errors.check_out_date}>
+                            <Input type="datetime-local" value={draft.check_out_date}
                                 min={draft.check_in_date || undefined}
                                 onChange={(e) => set("check_out_date", e.target.value)}
                                 className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />

@@ -3,26 +3,40 @@
 import { BookingStatsType } from "@/types";
 import { cn } from "@/lib/utils";
 import { DashboardStatsCardConfig } from "@/app/(afterlogin)/dashboard/config";
+import { useRouter } from "next/navigation";
 
 interface DashboardStatsProps {
     stats: BookingStatsType | null;
     cards: DashboardStatsCardConfig[];
+    viewAllHref?: string;
 }
 
-export function DashboardStats({ stats, cards }: DashboardStatsProps) {
+export function DashboardStats({ stats, cards, viewAllHref }: DashboardStatsProps) {
+    const router = useRouter();
+
     if (!stats || !cards) return null;
+
+    const handleCardClick = (filterValue?: string) => {
+        if (!viewAllHref) return;
+        if (filterValue && filterValue !== "all") {
+            router.push(`${viewAllHref}?status=${filterValue}`);
+        } else {
+            router.push(viewAllHref);
+        }
+    };
 
     return (
         <div className={cn(
             "grid gap-6 mb-8",
             "grid-cols-1 sm:grid-cols-2",
-            cards.length <= 5 ? "lg:grid-cols-5" : "lg:grid-cols-3 xl:grid-cols-6"
+            cards.length <= 5 ? "lg:grid-cols-4" : "lg:grid-cols-3 xl:grid-cols-6"
         )}>
             {cards.map((card, index) => {
                 const value = stats[card.key] ?? 0;
                 return (
                     <div
                         key={index}
+                        onClick={() => handleCardClick(card.filterValue)}
                         className={cn(
                             "rounded-[16px] p-4 flex items-center gap-5 shadow-sm transition-transform hover:scale-[1.02] cursor-pointer",
                             card.bgClass

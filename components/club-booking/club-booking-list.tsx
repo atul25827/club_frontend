@@ -1,5 +1,7 @@
 "use client";
 
+import { useSearchParams, useRouter } from "next/navigation";
+
 import { useEffect, useState, useCallback } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -7,7 +9,6 @@ import { Input } from "@/components/ui/input";
 import { MapPin, Calendar, Search, Plus } from "lucide-react";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ListDefinition } from "@/app/(afterlogin)/dashboard/config";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,9 @@ interface ClubBookingListProps {
 }
 
 export function ClubBookingList({ config, onViewDetails }: ClubBookingListProps) {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+
     // State
     const [bookings, setBookings] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -34,7 +38,30 @@ export function ClubBookingList({ config, onViewDetails }: ClubBookingListProps)
 
     // Filters
     const [searchTerm, setSearchTerm] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState(searchParams?.get("status") || "all");
+
+    // Sync searchParams to state if it changes
+    useEffect(() => {
+        const status = searchParams?.get("status");
+        if (status && status !== statusFilter) {
+            setStatusFilter(status);
+            setCurrentPage(1);
+        }
+    }, [searchParams]);
+
+    const handleStatusChange = (val: string) => {
+        setStatusFilter(val);
+        setCurrentPage(1);
+        if (searchParams) {
+            const params = new URLSearchParams(searchParams.toString());
+            if (val === 'all') {
+                params.delete('status');
+            } else {
+                params.set('status', val);
+            }
+            router.replace(`?${params.toString()}`);
+        }
+    };
 
     const fetchBookings = useCallback(async () => {
         setLoading(true);
@@ -65,7 +92,6 @@ export function ClubBookingList({ config, onViewDetails }: ClubBookingListProps)
     }, [fetchBookings]);
 
     const totalPages = Math.ceil(totalCount / itemsPerPage);
-
     return (
         <div className="">
             {/* <h2 className="text-2xl font-bold text-[#271E4A] mb-6">{config.title}</h2> */}
@@ -83,7 +109,7 @@ export function ClubBookingList({ config, onViewDetails }: ClubBookingListProps)
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                    <Select value={statusFilter} onValueChange={(val) => { setStatusFilter(val); setCurrentPage(1); }}>
+                    <Select value={statusFilter} onValueChange={handleStatusChange}>
                         <SelectTrigger className="w-full md:w-[200px] h-[44px] rounded-[8px] border-[#D0D5DD] text-[#667085]">
                             <SelectValue placeholder="Status" />
                         </SelectTrigger>
@@ -141,7 +167,7 @@ export function ClubBookingList({ config, onViewDetails }: ClubBookingListProps)
                                     {config.columns.map((col, colIdx) => {
                                         const value = booking[col.key];
                                         return (
-                                            <TableCell key={colIdx} className="py-4 text-[#344054] text-sm px-4">
+                                            <TableCell key={colIdx} className="py-4 text-[#344054] text-sm px-4 text-nowrap">
                                                 {col.render ? (
                                                     col.render(booking, onViewDetails)
                                                 ) : col.key.includes('status') ? (

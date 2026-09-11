@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Plus, BedDouble, Trash2, Loader2 } from "lucide-react";
 import { api } from "@/services/api";
-import { formatDisplayDate } from "@/lib/date-utils";
+import { formatDisplayDate, toFrappeDatetime } from "@/lib/date-utils";
 import { validateTab3Draft, toErrorMap, type Tab3Draft } from "@/lib/booking-validation";
 import type { StayEntry } from "@/types/club-booking.types";
 import type { Country, State } from "@/types";
@@ -98,8 +98,8 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
         const entry: StayEntry = {
             distributor_or_guest_name: draft.distributor_or_guest_name,
             designation: draft.designation || undefined,
-            check_in_date: draft.check_in_date,
-            check_out_date: draft.check_out_date,
+            check_in_date: toFrappeDatetime(draft.check_in_date) || "",
+            check_out_date: toFrappeDatetime(draft.check_out_date) || "",
             firm_or_hospital_name: draft.firm_or_hospital_name || undefined,
             repeat_guest: (draft.repeat_guest === "Yes" || draft.repeat_guest === "No") ? draft.repeat_guest : undefined,
             state: draft.state || undefined,
@@ -138,14 +138,14 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
                         className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                 </Field>
 
-                <Field label="Check-in Date" required error={errors.check_in_date}>
-                    <Input type="date" value={draft.check_in_date}
+                <Field label="Check In Date and Time" required error={errors.check_in_date}>
+                    <Input type="datetime-local" value={draft.check_in_date}
                         onChange={(e) => set("check_in_date", e.target.value)}
                         className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                 </Field>
 
-                <Field label="Check-out Date" required error={errors.check_out_date}>
-                    <Input type="date" value={draft.check_out_date}
+                <Field label="Check Out Date Time" required error={errors.check_out_date}>
+                    <Input type="datetime-local" value={draft.check_out_date}
                         min={draft.check_in_date || undefined}
                         onChange={(e) => set("check_out_date", e.target.value)}
                         className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
