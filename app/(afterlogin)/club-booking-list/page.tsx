@@ -12,15 +12,15 @@ export default function ClubBookingListPage() {
 
     const activeConfig = useMemo(() => {
         if (!role) return null;
-        
+
         const userRoles = Array.isArray(role) ? role : [role];
         const normalizedUserRoles = userRoles.map(r => r.toUpperCase());
 
         // Find the first matching list configuration
         // Usually Admin should take priority if they have both, or we could use tabs here too
         // But for now, we'll pick the first one found in the registry order
-        return LIST_REGISTRY.find(list => 
-            list.roles.some(requiredRole => 
+        return LIST_REGISTRY.find(list =>
+            list.roles.some(requiredRole =>
                 normalizedUserRoles.includes(requiredRole.toUpperCase())
             )
         );

@@ -30,13 +30,13 @@ export async function middleware(request: NextRequest) {
     }
 
     // Define guarded route patterns
-    const protectedRoutes = ['/dashboard'];
+    const protectedRoutes = ['/dashboard', '/club-booking', '/club-booking/', '/club-booking-list', '/club-booking-list/'];
 
     const isProtectedRoute = protectedRoutes.some(route =>
         pathname === route || pathname.startsWith(`${route}/`)
     );
 
-    //  Not logged in or tampered JWT → redirect to login
+    // ❌ Not logged in or tampered JWT → redirect to login
     if (!isValidSession && isProtectedRoute) {
         const loginUrl = new URL('/login', request.url);
         loginUrl.searchParams.set('redirect', pathname);

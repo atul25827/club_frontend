@@ -32,8 +32,11 @@ import {
     BedDouble,
     Info,
     Check,
-    X
+    X,
+    ChevronLeft
 } from "lucide-react";
+import { formatDisplayDate } from '@/lib/date-utils';
+import Link from 'next/link';
 
 // --- Reusable UI Sub-components ---
 
@@ -84,6 +87,21 @@ export function BookingDetailsView({ booking }: { booking: any }) {
         }
     };
 
+    /** Handles comma-separated date strings (e.g. "2026-04-01, 2026-04-02") */
+    const formatDates = (dateStr: string) => {
+        if (!dateStr) return "—";
+        // If it contains commas, split and format each date individually
+        if (dateStr.includes(",")) {
+            return dateStr
+                .split(",")
+                .map((d) => d.trim())
+                .filter(Boolean)
+                .map((d) => formatDate(d))
+                .join(", ");
+        }
+        return formatDate(dateStr);
+    };
+
     const getStayType = (item: any) => {
         const isStay = item.is_stay || item.stay_required;
         const isFood = item.is_food === 1 || item.booking_for;
@@ -127,7 +145,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
             setIsSubmitting(false);
         }
     };
-
+    console.log(stayList, "stayList")
     return (
         <div className="w-full p-2 sm:p-4 lg:p-2 space-y-8 animate-in fade-in duration-500 bg-white">
 
@@ -139,24 +157,37 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                     </div>
                     <h2 className="text-[17px] font-bold text-[#271E4A] tracking-tight">Booking Summary</h2>
                 </div>
-                {booking?.can_approve && (
-                    <div className="flex gap-3 ml-4">
+
+
+                <div className="flex gap-3 ml-4">
+                    <Link href="/club-booking-list" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">
+
                         <Button
-                            onClick={() => initiateAction('Approve')}
-                            className="bg-[#D1FADF] cursor-pointer hover:bg-[#A6F4C5] text-[#027A48] border border-[#027A48]/20 gap-2 font-bold h-9 px-4 rounded-lg transition-all active:scale-95 shadow-sm"
+                            variant="outline"
+                            className="cursor-pointer border-[#e5e7eb] text-[#364153] gap-2 font-medium h-9 px-4 rounded-lg transition-all active:scale-95 shadow-sm"
                         >
-                            <Check className="h-4 w-4" />
-                            Approve
+                            <ChevronLeft className="w-4 h-4 mr-1 " />  Back
                         </Button>
-                        <Button
-                            onClick={() => initiateAction('Reject')}
-                            className="bg-[#FEE4E2] cursor-pointer hover:bg-[#FECDCA] text-[#B42318] border border-[#B42318]/20 gap-2 font-bold h-9 px-4 rounded-lg transition-all active:scale-95 shadow-sm"
-                        >
-                            <X className="h-4 w-4" />
-                            Reject
-                        </Button>
-                    </div>
-                )}
+                    </Link>
+                    {booking?.can_approve && (
+                        <>
+                            <Button
+                                onClick={() => initiateAction('Approve')}
+                                className="bg-[#D1FADF] cursor-pointer hover:bg-[#A6F4C5] text-[#027A48] border border-[#027A48]/20 gap-2 font-medium h-9 px-4 rounded-lg transition-all active:scale-95 shadow-sm"
+                            >
+                                <Check className="h-4 w-4" />
+                                Approve
+                            </Button>
+                            <Button
+                                onClick={() => initiateAction('Reject')}
+                                className="bg-[#FEE4E2] cursor-pointer hover:bg-[#FECDCA] text-[#B42318] border border-[#B42318]/20 gap-2 font-medium h-9 px-4 rounded-lg transition-all active:scale-95 shadow-sm"
+                            >
+                                <X className="h-4 w-4" />
+                                Reject
+                            </Button>
+                        </>
+                    )}
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-4 bg-[#F9FAFB]/50 p-5 rounded-xl border border-gray-100">
@@ -170,7 +201,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                     label="Approval Status"
                     value={
                         <span className={cn(
-                            "font-bold text-[14px]",
+                            "font-normal text-[14px]",
                             booking?.approval_status?.toLowerCase().includes("awaiting") ? "text-orange-600" : "text-[#101828]"
                         )}>
                             {approvalStatusText}
@@ -247,8 +278,8 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                             <TableCell className="text-gray-500 text-[13px] px-4">{stay.designation || "—"}</TableCell>
                                             <TableCell className="text-gray-500 text-[13px] whitespace-nowrap px-4">{stay.firm_or_hospital_name || "—"}</TableCell>
                                             <TableCell className="text-gray-500 text-[13px] px-4">{stay.state ? `${stay.state}, ${stay.country || ""}` : stay.country || "—"}</TableCell>
-                                            <TableCell className="font-semibold text-gray-700 text-[12px] px-4">{formatDate(stay.check_in_date)}</TableCell>
-                                            <TableCell className="font-semibold text-gray-700 text-[12px] px-4">{formatDate(stay.check_out_date)}</TableCell>
+                                            <TableCell className="font-semibold text-gray-700 text-[12px] px-4">{formatDisplayDate(stay.check_in_date)}</TableCell>
+                                            <TableCell className="font-semibold text-gray-700 text-[12px] px-4">{formatDisplayDate(stay.check_out_date)}</TableCell>
                                             <TableCell className="text-[12px] px-4">
                                                 <span className="bg-orange-50 text-orange-600 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
                                                     {getStayType(stay)}
@@ -284,8 +315,8 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
                                         <KeyValueItem label="Organization" value={stay.firm_or_hospital_name} />
                                         <KeyValueItem label="Location" value={stay.country} />
-                                        <KeyValueItem label="Check-in" value={formatDate(stay.check_in_date)} />
-                                        <KeyValueItem label="Check-out" value={formatDate(stay.check_out_date)} />
+                                        <KeyValueItem label="Check-in" value={formatDisplayDate(stay.check_in_date)} />
+                                        <KeyValueItem label="Check-out" value={formatDisplayDate(stay.check_out_date)} />
                                     </div>
                                 </div>
                             ))}
@@ -324,7 +355,9 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                     {foodList.map((food: any, idx: number) => (
                                         <TableRow key={idx} className="hover:bg-slate-50 border-gray-50 transition-colors h-12">
                                             <TableCell className="text-gray-600 font-medium text-[13px] px-4">{food.booking_for || "—"}</TableCell>
-                                            <TableCell className="font-bold text-[#101828] text-[13px] py-2 px-4 whitespace-nowrap">{formatDate(food.day)}</TableCell>
+                                            <TableCell className="font-bold text-[#101828] text-[13px] py-2 px-4 text-nowrap">
+                                                <span className="">{formatDates(food.day)}</span>
+                                            </TableCell>
                                             <TableCell className="text-gray-600 text-[13px] px-4 font-semibold">{food.distributor_or_guest_name || "—"}</TableCell>
                                             <TableCell className="font-bold text-green-700 text-[14px] px-4 text-center">{food.total_no_of_guest || 0}</TableCell>
                                             <TableCell className="text-gray-500 text-[13px] px-4 whitespace-nowrap">{food.designation || "—"}</TableCell>
@@ -341,7 +374,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                             <TableCell className="text-gray-500 text-[13px] px-4 whitespace-nowrap">{food.country || "—"}</TableCell>
                                             <TableCell className="text-gray-600 text-[12px] whitespace-nowrap px-4">{food.food_preferences || "—"}</TableCell>
                                             <TableCell className="text-[12px] px-4">
-                                                <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
+                                                <span className="bg-green-50 text-blue-400 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest whitespace-nowrap">
                                                     {food.meal_type || "—"}
                                                 </span>
                                             </TableCell>
@@ -369,7 +402,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                 <div key={idx} className="border border-gray-100 rounded-xl p-4 space-y-3 shadow-sm bg-gray-50/10">
                                     <div className="flex justify-between items-center">
                                         <div className="flex flex-col">
-                                            <span className="font-bold text-[#101828] text-[14px]">{formatDate(food.day)}</span>
+                                            <span className="font-bold text-[#101828] text-[14px]">{formatDates(food.day)}</span>
                                             <span className="text-[11px] text-gray-500 uppercase">{food.booking_for || "Booking"}</span>
                                         </div>
                                         <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest">

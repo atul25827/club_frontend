@@ -30,8 +30,22 @@ export function generateDayOptions(from_date: string, to_date: string): DayOptio
 export function formatDisplayDate(dateStr: string): string {
     if (!dateStr) return "-";
     try {
-        return format(parseISO(dateStr), "dd MMM yyyy");
+        const hasTime = dateStr.includes("T") || dateStr.includes(" ");
+        const isoStr = dateStr.replace(" ", "T");
+        return format(parseISO(isoStr), hasTime ? "dd MMM yyyy, hh:mm a" : "dd MMM yyyy");
     } catch {
         return dateStr;
     }
+}
+
+/** Convert datetime-local input to Frappe standard datetime (YYYY-MM-DD HH:mm:ss) */
+export function toFrappeDatetime(dateStr: string): string;
+export function toFrappeDatetime(dateStr?: string): string | undefined;
+export function toFrappeDatetime(dateStr?: string): string | undefined {
+    if (!dateStr) return dateStr;
+    if (dateStr.includes("T")) {
+        const replaced = dateStr.replace("T", " ");
+        return replaced.length === 16 ? `${replaced}:00` : replaced;
+    }
+    return dateStr;
 }

@@ -8,10 +8,8 @@ import { Tabs } from "@/components/ui/tabs";
 
 export default function AdminDashboardPage() {
     const { role, isLoading, isAuthenticated } = useAuth();
-
     const activeDashboards = useMemo(() => {
         if (!role) return [];
-
         const userRoles = Array.isArray(role) ? role : [role];
         const normalizedUserRoles = userRoles.map(r => r.toUpperCase());
 
@@ -22,7 +20,6 @@ export default function AdminDashboardPage() {
             )
         );
     }, [role]);
-
     if (isLoading || !isAuthenticated) {
         return null; // Prevents generic fallback UI from flashing during logout or initial load
     }

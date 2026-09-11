@@ -7,10 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SearchableSelect } from "@/components/ui/searchable-select";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Plus, Calendar, Trash2, Loader2, ChevronDown } from "lucide-react";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { Plus, Calendar, Trash2, Loader2 } from "lucide-react";
 import { api } from "@/services/api";
-import { generateDayOptions } from "@/lib/date-utils";
+import { generateDayOptions, toFrappeDatetime } from "@/lib/date-utils";
 import { validateTab2Draft, toErrorMap, type Tab2Draft } from "@/lib/booking-validation";
 import type { FoodCateringEntry, DayOption } from "@/types/club-booking.types";
 import type { ClubMasterData, Country, State } from "@/types";
@@ -69,6 +69,12 @@ interface Tab2Props {
     isSubmitting?: boolean;
 }
 
+// ─── Helper: parse comma-separated string to array ────────────────────────────
+
+function csvToArray(csv: string): string[] {
+    return csv ? csv.split(",").map((s) => s.trim()).filter(Boolean) : [];
+}
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function Tab2FoodCatering({
@@ -114,9 +120,38 @@ export function Tab2FoodCatering({
     // Field change handler
     const set = (field: keyof Tab2Draft, value: any) => {
         setDraft((d) => ({ ...d, [field]: value }));
-        // Clear error on change
         if (errors[field]) setErrors((e) => { const next = { ...e }; delete next[field]; return next; });
     };
+
+    // ── Derived: Club = single select food pref, no count fields ──
+    const isClub = draft.booking_for === "Club";
+
+    const selectedFoodPrefs = useMemo(
+        () => csvToArray(draft.food_preferences).map((s) => s.toLowerCase()),
+        [draft.food_preferences]
+    );
+
+    // Count fields only visible when NOT Club
+    const showVegCount = !isClub && selectedFoodPrefs.some((p) => p === "veg" || p === "vegetarian");
+    const showNonVegCount = !isClub && selectedFoodPrefs.some((p) => p.includes("non"));
+    const showJainCount = !isClub && selectedFoodPrefs.some((p) => p.includes("jain"));
+    const showOtherCount = !isClub && selectedFoodPrefs.some((p) => p.includes("other"));
+
+    // ── Multi-select option arrays from master data ──
+    const dayMultiOptions = useMemo(
+        () => dayOptions.map((d) => ({ label: d.label, value: d.value })),
+        [dayOptions]
+    );
+
+    const foodPrefOptions = useMemo(
+        () => (masterData?.food_preferences ?? []).map((item) => ({ label: item.name, value: item.name })),
+        [masterData?.food_preferences]
+    );
+
+    const mealTypeOptions = useMemo(
+        () => (masterData?.meal_type ?? []).map((item) => ({ label: item.name, value: item.name })),
+        [masterData?.meal_type]
+    );
 
     // Add entry
     const handleAdd = () => {
@@ -144,8 +179,8 @@ export function Tab2FoodCatering({
             other: draft.other ? Number(draft.other) : undefined,
             is_stay: draft.stay_required ? 1 : 0,
             is_food: 1,
-            check_in_date: draft.check_in_date || undefined,
-            check_out_date: draft.check_out_date || undefined,
+            check_in_date: toFrappeDatetime(draft.check_in_date) || undefined,
+            check_out_date: toFrappeDatetime(draft.check_out_date) || undefined,
             remark: draft.remark,
         };
 
@@ -155,6 +190,40 @@ export function Tab2FoodCatering({
     };
 
     const hasGuestDetails = draft.booking_for === "Club" || draft.booking_for === "Club House" || draft.booking_for === "Guest";
+
+    // ── Helper: get badge for food/stay ──
+    const getTypeBadge = (entry: FoodCateringEntry) => {
+        const isStay = entry.is_stay === 1 || entry.stay_required;
+        const isFood = entry.is_food === 1;
+
+        if (isStay && isFood) {
+            return (
+                <div className="flex items-center gap-1">
+                    <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-green-50 text-green-700">
+                        Food
+                    </span>
+                    <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-orange-50 text-orange-600">
+                        Stay
+                    </span>
+                </div>
+            );
+        }
+        if (isFood) {
+            return (
+                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-green-50 text-green-700">
+                    Food
+                </span>
+            );
+        }
+        if (isStay) {
+            return (
+                <span className="inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-orange-50 text-orange-600">
+                    Stay
+                </span>
+            );
+        }
+        return <span className="text-[#9ca3af] text-xs">—</span>;
+    };
 
     return (
         <div className="flex flex-col gap-8 w-full">
@@ -175,22 +244,22 @@ export function Tab2FoodCatering({
                     </Select>
                 </Field>
 
-                {/* Day Wise Plan */}
+                {/* Day Wise Plan - MultiSelect */}
                 <Field label="Day Wise Plan" required error={errors.day}>
-                    <Select value={draft.day} onValueChange={(v) => set("day", v)}>
-                        <SelectTrigger className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {dayOptions.length === 0 ? (
-                                <SelectItem value="_none" disabled>Set From/To date in Tab 1</SelectItem>
-                            ) : (
-                                dayOptions.map((d) => (
-                                    <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>
-                                ))
-                            )}
-                        </SelectContent>
-                    </Select>
+                    {dayOptions.length === 0 ? (
+                        <div className="h-[42px] flex items-center px-3 border-2 border-[#e5e7eb] rounded-[8px] text-sm text-[#9ca3af]">
+                            Set From/To date in Tab 1
+                        </div>
+                    ) : (
+                        <MultiSelect
+                            options={dayMultiOptions}
+                            value={csvToArray(draft.day)}
+                            onChange={(selected) => set("day", selected.join(", "))}
+                            placeholder="Select days"
+                            showSelectAll
+                            error={!!errors.day}
+                        />
+                    )}
                 </Field>
 
                 {/* Conditional Guest Fields */}
@@ -208,7 +277,7 @@ export function Tab2FoodCatering({
                 ) : (
                     <Field label="Distributors/Guest Name" required error={errors.distributor_or_guest_name}>
                         <Input
-                            placeholder="Deepak Mathur"
+                            placeholder="Distributors/Guest Name"
                             value={draft.distributor_or_guest_name}
                             onChange={(e) => set("distributor_or_guest_name", e.target.value)}
                             className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]"
@@ -220,12 +289,12 @@ export function Tab2FoodCatering({
                 {hasGuestDetails && (
                     <>
                         <Field label="Designation" error={errors.designation}>
-                            <Input placeholder="Doctor" value={draft.designation}
+                            <Input placeholder="Designation" value={draft.designation}
                                 onChange={(e) => set("designation", e.target.value)}
                                 className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                         </Field>
                         <Field label="Firm/Hospital Name" error={errors.firm_or_hospital_name}>
-                            <Input placeholder="Atul Hospital" value={draft.firm_or_hospital_name}
+                            <Input placeholder="Firm/Hospital Name" value={draft.firm_or_hospital_name}
                                 onChange={(e) => set("firm_or_hospital_name", e.target.value)}
                                 className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                         </Field>
@@ -260,114 +329,72 @@ export function Tab2FoodCatering({
                     </>
                 )}
 
-                {/* Food Preference */}
+                {/* Food Preference - Single select for Club, MultiSelect otherwise */}
                 <Field label="Food Preference" required error={errors.food_preferences}>
-                    <Select value={draft.food_preferences} onValueChange={(v) => set("food_preferences", v)}>
-                        <SelectTrigger className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]">
-                            <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {(masterData?.food_preferences ?? []).map((item) => (
-                                <SelectItem key={item.name} value={item.name}>{item.name}</SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </Field>
-
-                {/* Meal Type (Multiselect except for Club) */}
-                <Field label="Meal Type" required error={errors.meal_type}>
-                    {draft.booking_for === "Club" ? (
-                        <Select value={draft.meal_type} onValueChange={(v) => set("meal_type", v)}>
-                            <SelectTrigger className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]">
+                    {isClub ? (
+                        <Select value={draft.food_preferences} onValueChange={(v) => set("food_preferences", v)}>
+                            <SelectTrigger className="h-[42px]">
                                 <SelectValue placeholder="Select" />
                             </SelectTrigger>
                             <SelectContent>
-                                {(masterData?.meal_type ?? []).map((item) => (
+                                {(masterData?.food_preferences ?? []).map((item) => (
                                     <SelectItem key={item.name} value={item.name}>{item.name}</SelectItem>
                                 ))}
                             </SelectContent>
                         </Select>
                     ) : (
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button
-                                    variant="outline"
-                                    className="w-full justify-between h-[42px] border-2 border-[#e5e7eb] rounded-[8px] font-normal text-[#364153]"
-                                >
-                                    <span className="truncate">
-                                        {draft.meal_type ? draft.meal_type : "Select"}
-                                    </span>
-                                    <ChevronDown className="h-4 w-4 opacity-50 ml-2 shrink-0" />
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-[200px] p-2 bg-white rounded-[8px] border border-[#e5e7eb] shadow-md z-50">
-                                {(!masterData?.meal_type || masterData.meal_type.length === 0) ? (
-                                    <p className="text-sm text-gray-500 p-2">Loading...</p>
-                                ) : (
-                                    <div className="flex flex-col gap-1">
-                                        {masterData.meal_type.map((item) => {
-                                            const selectedMeals = draft.meal_type ? draft.meal_type.split(",").map(s => s.trim()) : [];
-                                            const isChecked = selectedMeals.includes(item.name);
-                                            return (
-                                                <label key={item.name} className="flex items-center gap-2 p-2 hover:bg-slate-50 cursor-pointer rounded">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={isChecked}
-                                                        onChange={(e) => {
-                                                            const newMeals = e.target.checked
-                                                                ? [...selectedMeals, item.name]
-                                                                : selectedMeals.filter(m => m !== item.name);
-                                                            set("meal_type", newMeals.join(", "));
-                                                        }}
-                                                        className="w-4 h-4 rounded border-gray-300 accent-[#155dfc]"
-                                                    />
-                                                    <span className="text-sm font-medium text-gray-700">{item.name}</span>
-                                                </label>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </PopoverContent>
-                        </Popover>
+                        <MultiSelect
+                            options={foodPrefOptions}
+                            value={csvToArray(draft.food_preferences)}
+                            onChange={(selected) => set("food_preferences", selected.join(", "))}
+                            placeholder="Select preferences"
+                            showSelectAll
+                            error={!!errors.food_preferences}
+                        />
                     )}
                 </Field>
 
-                {/* Meal counts based on multiselect types */}
-                {draft.meal_type && draft.booking_for !== "Club" && (() => {
-                    const selectedMeals = draft.meal_type.split(",").map(s => s.trim().toLowerCase());
-                    return (
-                        <>
-                            {selectedMeals.some(m => m === "veg" || m === "vegetarian") && (
-                                <Field label="Veg Count" error={errors.veg}>
-                                    <Input type="number" min={0} placeholder="80" value={draft.veg}
-                                        onChange={(e) => set("veg", e.target.value)}
-                                        className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                                </Field>
-                            )}
-                            {selectedMeals.some(m => m.includes("non")) && (
-                                <Field label="Non-Veg Count" error={errors.non_veg}>
-                                    <Input type="number" min={0} placeholder="40" value={draft.non_veg}
-                                        onChange={(e) => set("non_veg", e.target.value)}
-                                        className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                                </Field>
-                            )}
-                            {selectedMeals.some(m => m.includes("jain")) && (
-                                <Field label="Jain Count" error={errors.jain}>
-                                    <Input type="number" min={0} placeholder="20" value={draft.jain}
-                                        onChange={(e) => set("jain", e.target.value)}
-                                        className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                                </Field>
-                            )}
-                            {selectedMeals.some(m => m.includes("other")) && (
-                                <Field label="Others Count" error={errors.other}>
-                                    <Input type="number" min={0} placeholder="10" value={draft.other}
-                                        onChange={(e) => set("other", e.target.value)}
-                                        className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                                </Field>
-                            )}
-                        </>
-                    );
-                })()}
+                {/* Meal Type - MultiSelect (no count fields depend on this) */}
+                <Field label="Meal Type" required error={errors.meal_type}>
+                    <MultiSelect
+                        options={mealTypeOptions}
+                        value={csvToArray(draft.meal_type)}
+                        onChange={(selected) => set("meal_type", selected.join(", "))}
+                        placeholder="Select meal types"
+                        showSelectAll
+                        error={!!errors.meal_type}
+                    />
+                </Field>
+
+                {/* Count fields based on food_preferences (NOT meal_type) */}
+                {showVegCount && (
+                    <Field label="Veg Count" error={errors.veg}>
+                        <Input type="number" min={0} placeholder="80" value={draft.veg}
+                            onChange={(e) => set("veg", e.target.value)}
+                            className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
+                    </Field>
+                )}
+                {showNonVegCount && (
+                    <Field label="Non-Veg Count" error={errors.non_veg}>
+                        <Input type="number" min={0} placeholder="40" value={draft.non_veg}
+                            onChange={(e) => set("non_veg", e.target.value)}
+                            className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
+                    </Field>
+                )}
+                {showJainCount && (
+                    <Field label="Jain Count" error={errors.jain}>
+                        <Input type="number" min={0} placeholder="20" value={draft.jain}
+                            onChange={(e) => set("jain", e.target.value)}
+                            className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
+                    </Field>
+                )}
+                {showOtherCount && (
+                    <Field label="Others Count" error={errors.other}>
+                        <Input type="number" min={0} placeholder="10" value={draft.other}
+                            onChange={(e) => set("other", e.target.value)}
+                            className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
+                    </Field>
+                )}
 
                 {/* Stay Required (Guest only) */}
                 {hasGuestDetails && (
@@ -387,13 +414,13 @@ export function Tab2FoodCatering({
                 {/* Stay dates */}
                 {draft.stay_required && hasGuestDetails && (
                     <>
-                        <Field label="Check-in Date" required error={errors.check_in_date}>
-                            <Input type="date" value={draft.check_in_date}
+                        <Field label="Check In Date and Time" required error={errors.check_in_date}>
+                            <Input type="datetime-local" value={draft.check_in_date}
                                 onChange={(e) => set("check_in_date", e.target.value)}
                                 className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                         </Field>
-                        <Field label="Check-out Date" required error={errors.check_out_date}>
-                            <Input type="date" value={draft.check_out_date}
+                        <Field label="Check Out Date Time" required error={errors.check_out_date}>
+                            <Input type="datetime-local" value={draft.check_out_date}
                                 min={draft.check_in_date || undefined}
                                 onChange={(e) => set("check_out_date", e.target.value)}
                                 className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
@@ -435,7 +462,7 @@ export function Tab2FoodCatering({
                     </div>
                 ) : (
                     <div className="border border-[#e5e7eb] rounded-[16px] overflow-x-auto shadow-sm">
-                        <Table className="whitespace-nowrap min-w-[1200px]">
+                        <Table className="whitespace-nowrap min-w-[1400px]">
                             <TableHeader className="bg-[#f8f9fa]">
                                 <TableRow>
                                     <TableHead className="font-medium text-[#364153]">Booking For</TableHead>
@@ -453,6 +480,7 @@ export function Tab2FoodCatering({
                                     <TableHead className="font-medium text-[#364153]">Non-Veg</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Jain</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Other</TableHead>
+                                    <TableHead className="font-medium text-[#364153]">Food & Stay</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Remark</TableHead>
                                     <TableHead className="font-medium text-[#364153] sticky right-0 bg-[#f8f9fa]">Action</TableHead>
                                 </TableRow>
@@ -471,16 +499,17 @@ export function Tab2FoodCatering({
                                         <TableCell className="text-[#6a7282]">{entry.food_preferences || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.meal_type || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.total_no_of_guest || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.veg || "0"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.non_veg || "0"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.jain || "0"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.other || "0"}</TableCell>
+                                        <TableCell className="text-[#6a7282]">{entry.veg || "-"}</TableCell>
+                                        <TableCell className="text-[#6a7282]">{entry.non_veg || "-"}</TableCell>
+                                        <TableCell className="text-[#6a7282]">{entry.jain || "-"}</TableCell>
+                                        <TableCell className="text-[#6a7282]">{entry.other || "-"}</TableCell>
+                                        <TableCell>{getTypeBadge(entry)}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.remark || "-"}</TableCell>
                                         <TableCell className="sticky right-0 bg-white">
                                             <button
                                                 type="button"
                                                 onClick={() => entry.name && onRemove(entry.name)}
-                                                className="text-gray-400 hover:text-red-500 transition-colors"
+                                                className="cursor-pointer text-red-500 hover:text-red-500 transition-colors"
                                                 title="Remove entry"
                                             >
                                                 <Trash2 className="w-4 h-4" />

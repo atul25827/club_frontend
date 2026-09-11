@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useId } from "react";
+import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-    Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
-} from "@/components/ui/select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import type { Tab1FormData } from "@/types/club-booking.types";
-import type { LookupItem } from "@/types";
+import type { ClubMasterData } from "@/types";
 
 interface FieldProps {
     label: string;
@@ -32,28 +30,33 @@ interface Tab1Props {
     data: Tab1FormData;
     errors: Record<string, string>;
     onChange: (field: keyof Tab1FormData, value: string) => void;
+    masterData: ClubMasterData | null;
 }
 
-const GUEST_REGIONS = ["Domestics", "International", "North", "South", "East", "West"];
+export function Tab1EventInfo({ data, errors, onChange, masterData }: Tab1Props) {
+    // Parse comma-separated string to array for MultiSelect
+    const selectedRegions = data.guest_region
+        ? data.guest_region.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
 
-export function Tab1EventInfo({ data, errors, onChange }: Tab1Props) {
+    const regionOptions = (masterData?.guest_region ?? []).map((item) => ({
+        label: item.name,
+        value: item.name,
+    }));
+
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-8">
-            {/* Guest Region */}
+            {/* Guest Region - MultiSelect */}
             <Field label="Guest Region" error={errors.guest_region}>
-                <Select value={data.guest_region} onValueChange={(v) => onChange("guest_region", v)}>
-                    <SelectTrigger className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]">
-                        <SelectValue placeholder="Select" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {GUEST_REGIONS.map((r) => (
-                            <SelectItem key={r} value={r}>{r}</SelectItem>
-                        ))}
-                    </SelectContent>
-                </Select>
+                <MultiSelect
+                    options={regionOptions}
+                    value={selectedRegions}
+                    onChange={(selected) => onChange("guest_region", selected.join(", "))}
+                    placeholder="Select region"
+                    showSelectAll
+                    error={!!errors.guest_region}
+                />
             </Field>
-
-
 
             {/* Event Name */}
             <Field label="Event Name" required error={errors.event_name}>

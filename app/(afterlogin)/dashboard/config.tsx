@@ -15,6 +15,7 @@ export interface DashboardStatsCardConfig {
     bgClass: string;
     textClass: string;
     iconClass: string;
+    filterValue?: string;
 }
 
 export interface DashboardDefinition {
@@ -39,12 +40,12 @@ export const DASHBOARD_REGISTRY: DashboardDefinition[] = [
         getList: (page, limit) => api.getApproverClubBookingList(page, limit),
         viewAllHref: "/club-booking-list",
         statsCards: [
-            { label: "Total Events", key: "total_bookings", icon: Calendar, bgClass: "bg-[#E3E8FF]", textClass: "text-[#33398A]", iconClass: "text-[#33398A]" },
-            // { label: "Total Submitted", key: "total_submitted", icon: Clock, bgClass: "bg-[#E0F2FE]", textClass: "text-[#0369A1]", iconClass: "text-[#0369A1]" },
-            { label: "Total Pending", key: "total_pending", icon: Clock, bgClass: "bg-[#FEF0C7]", textClass: "text-[#B54708]", iconClass: "text-[#B54708]" },
-            { label: "Total Approved", key: "total_approved", icon: CalendarCheck, bgClass: "bg-[#D1FADF]", textClass: "text-[#027A48]", iconClass: "text-[#027A48]" },
-            { label: "Total Rejected", key: "total_rejected", icon: XSquare, bgClass: "bg-red-100", textClass: "text-red-600", iconClass: "text-red-600" },
-            // { label: "Total Cancelled", key: "total_cancelled", icon: Ban, bgClass: "bg-orange-100", textClass: "text-orange-600", iconClass: "text-orange-600" },
+            { label: "Total Events", key: "total_bookings", icon: Calendar, bgClass: "bg-[#E3E8FF]", textClass: "text-[#33398A]", iconClass: "text-[#33398A]", filterValue: "all" },
+            // { label: "Total Submitted", key: "total_submitted", icon: Clock, bgClass: "bg-[#E0F2FE]", textClass: "text-[#0369A1]", iconClass: "text-[#0369A1]", filterValue: "Submitted" },
+            { label: "Total Pending", key: "total_pending", icon: Clock, bgClass: "bg-[#FEF0C7]", textClass: "text-[#B54708]", iconClass: "text-[#B54708]", filterValue: "Awaiting" },
+            { label: "Total Approved", key: "total_approved", icon: CalendarCheck, bgClass: "bg-[#D1FADF]", textClass: "text-[#027A48]", iconClass: "text-[#027A48]", filterValue: "Approved" },
+            { label: "Total Rejected", key: "total_rejected", icon: XSquare, bgClass: "bg-red-100", textClass: "text-red-600", iconClass: "text-red-600", filterValue: "Rejected" },
+            // { label: "Total Cancelled", key: "total_cancelled", icon: Ban, bgClass: "bg-orange-100", textClass: "text-orange-600", iconClass: "text-orange-600", filterValue: "Cancelled" },
         ],
         columns: [
             {
@@ -60,9 +61,9 @@ export const DASHBOARD_REGISTRY: DashboardDefinition[] = [
                 )
             },
             { header: "Event Name", key: "event_name" },
-            { header: "Full Name", key: "full_name" },
             { header: "From Date", key: "from_date" },
             { header: "To Date", key: "to_date" },
+            { header: "Created By", key: "full_name" },
             { header: "Status", key: "booking_status" },
         ]
     },
@@ -75,12 +76,12 @@ export const DASHBOARD_REGISTRY: DashboardDefinition[] = [
         getList: (page, limit) => api.getClubBookingList(page, limit),
         viewAllHref: "/club-booking-list",
         statsCards: [
-            { label: "Total Events", key: "total_bookings", icon: Calendar, bgClass: "bg-[#E3E8FF]", textClass: "text-[#33398A]", iconClass: "text-[#33398A]" },
-            { label: "Total Submitted", key: "total_submitted", icon: Clock, bgClass: "bg-[#E0F2FE]", textClass: "text-[#0369A1]", iconClass: "text-[#0369A1]" },
-            // { label: "Total Pending", key: "total_pending", icon: Clock, bgClass: "bg-[#FEF0C7]", textClass: "text-[#B54708]", iconClass: "text-[#B54708]" },
-            { label: "Total Approved", key: "total_approved", icon: CalendarCheck, bgClass: "bg-[#D1FADF]", textClass: "text-[#027A48]", iconClass: "text-[#027A48]" },
-            { label: "Total Rejected", key: "total_rejected", icon: XSquare, bgClass: "bg-red-100", textClass: "text-red-600", iconClass: "text-red-600" },
-            // { label: "Total Cancelled", key: "total_cancelled", icon: Ban, bgClass: "bg-orange-100", textClass: "text-orange-600", iconClass: "text-orange-600" },
+            { label: "Total Events", key: "total_bookings", icon: Calendar, bgClass: "bg-[#E3E8FF]", textClass: "text-[#33398A]", iconClass: "text-[#33398A]", filterValue: "all" },
+            { label: "Total Submitted", key: "total_submitted", icon: Clock, bgClass: "bg-[#E0F2FE]", textClass: "text-[#0369A1]", iconClass: "text-[#0369A1]", filterValue: "Submitted" },
+            // { label: "Total Pending", key: "total_pending", icon: Clock, bgClass: "bg-[#FEF0C7]", textClass: "text-[#B54708]", iconClass: "text-[#B54708]", filterValue: "Awaiting" },
+            { label: "Total Approved", key: "total_approved", icon: CalendarCheck, bgClass: "bg-[#D1FADF]", textClass: "text-[#027A48]", iconClass: "text-[#027A48]", filterValue: "Approved" },
+            { label: "Total Rejected", key: "total_rejected", icon: XSquare, bgClass: "bg-red-100", textClass: "text-red-600", iconClass: "text-red-600", filterValue: "Rejected" },
+            // { label: "Total Cancelled", key: "total_cancelled", icon: Ban, bgClass: "bg-orange-100", textClass: "text-orange-600", iconClass: "text-orange-600", filterValue: "Cancelled" },
         ],
         columns: [
             {
@@ -98,6 +99,7 @@ export const DASHBOARD_REGISTRY: DashboardDefinition[] = [
             { header: "Event Name", key: "event_name" },
             { header: "From Date", key: "from_date" },
             { header: "To Date", key: "to_date" },
+            { header: "Created By", key: "full_name" },
             { header: "Status", key: "booking_status" },
         ]
     },
@@ -165,6 +167,7 @@ export const LIST_REGISTRY: ListDefinition[] = [
             { header: "Event Title", key: "event_name" },
             { header: "Start Date", key: "from_date" },
             { header: "End Date", key: "to_date" },
+            { header: "Created By", key: "full_name" },
             { header: "Booking Status", key: "booking_status" },
             { header: "Approval Status", key: "approval_status" },
         ],
@@ -197,6 +200,7 @@ export const LIST_REGISTRY: ListDefinition[] = [
             { header: "Event Title", key: "event_name" },
             { header: "Start Date", key: "from_date" },
             { header: "End Date", key: "to_date" },
+            { header: "Created By", key: "full_name" },
             { header: "Booking Status", key: "booking_status" },
         ],
         mobileFields: {

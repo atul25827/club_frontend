@@ -86,16 +86,16 @@ export function SearchableSelect({
                     disabled={disabled}
                     className={cn(
                         "flex h-[42px] w-full items-center justify-between rounded-[8px] border-2 border-[#e5e7eb] bg-white px-3 py-2 text-sm",
-                        "transition-colors hover:border-[#155dfc] focus:outline-none focus:border-[#155dfc]",
-                        "disabled:cursor-not-allowed disabled:opacity-50",
-                        open && "border-[#155dfc] ring-2 ring-[#155dfc]/20",
+                        "transition-all focus:outline-none focus:border-[#7D3FD0] focus:ring-2 focus:ring-[#7D3FD0]/20",
+                        "disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50",
+                        open && "border-[#7D3FD0] ring-2 ring-[#7D3FD0]/20",
                         className
                     )}
                     aria-expanded={open}
                 >
                     <div className="flex items-center gap-2 min-w-0">
-                        <Globe className="w-4 h-4 text-[#adadad] shrink-0" />
-                        <span className={cn("truncate", selectedLabel ? "text-[#101828]" : "text-[#adadad]")}>
+                        <Globe className="w-4 h-4 text-[#9ca3af] shrink-0" />
+                        <span className={cn("truncate text-sm font-medium", selectedLabel ? "text-[#101828]" : "text-[#9ca3af]")}>
                             {selectedLabel ?? placeholder}
                         </span>
                     </div>
@@ -111,24 +111,24 @@ export function SearchableSelect({
             <PopoverContent
                 align="start"
                 sideOffset={4}
-                className="p-0 shadow-xl border border-[#e5e7eb] rounded-[12px] overflow-hidden"
+                className="p-0 shadow-lg shadow-black/8 border border-[#e5e7eb] rounded-lg overflow-hidden"
                 style={{ width: "var(--radix-popover-trigger-width)", minWidth: "220px" }}
             >
                 {/* Search header */}
-                <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[#e5e7eb] bg-[#f8f9fa]">
-                    <Search className="w-4 h-4 text-[#adadad] shrink-0" />
+                <div className="flex items-center gap-2 px-3 py-2.5 border-b border-[#f0f0f0] bg-[#faf8ff]">
+                    <Search className="w-4 h-4 text-[#9ca3af] shrink-0" />
                     <input
                         ref={inputRef}
                         value={search}
                         onChange={handleSearchChange}
                         placeholder={searchPlaceholder}
-                        className="flex-1 bg-transparent text-[13px] text-[#101828] placeholder:text-[#adadad] outline-none"
+                        className="flex-1 bg-transparent text-sm text-[#101828] font-medium placeholder:text-[#9ca3af] outline-none"
                     />
                     {search && (
                         <button
                             type="button"
                             onClick={() => setSearch("")}
-                            className="text-[#adadad] hover:text-[#364153] text-[16px] leading-none"
+                            className="text-[#9ca3af] hover:text-[#364153] text-[16px] leading-none transition-colors"
                         >
                             ×
                         </button>
@@ -138,13 +138,13 @@ export function SearchableSelect({
                 {/* Options list */}
                 <div className="max-h-[220px] overflow-y-auto">
                     {isLoading ? (
-                        <div className="flex items-center justify-center py-6 text-[13px] text-[#adadad]">
+                        <div className="flex items-center justify-center py-6 text-sm text-[#9ca3af]">
                             <span className="animate-pulse">{loadingMessage}</span>
                         </div>
                     ) : filtered.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-6 gap-1">
                             <Globe className="w-5 h-5 text-[#d1d5db]" />
-                            <span className="text-[13px] text-[#adadad]">{emptyMessage}</span>
+                            <span className="text-sm text-[#9ca3af]">{emptyMessage}</span>
                         </div>
                     ) : (
                         filtered.map(option => {
@@ -159,13 +159,13 @@ export function SearchableSelect({
                                         setOpen(false);
                                     }}
                                     className={cn(
-                                        "flex w-full items-center justify-between px-3 py-2.5 text-[13px] text-left",
-                                        "transition-colors hover:bg-[#f0f5ff] hover:text-[#155dfc]",
-                                        isSelected && "bg-[#eff6ff] text-[#155dfc] font-medium"
+                                        "flex w-full items-center justify-between px-3 py-2 text-sm font-medium text-left",
+                                        "transition-colors hover:bg-[#f8f5ff] hover:text-[#7D3FD0]",
+                                        isSelected && "bg-[#faf7ff] text-[#7D3FD0]"
                                     )}
                                 >
                                     <span className="truncate">{label}</span>
-                                    {isSelected && <Check className="w-4 h-4 shrink-0 text-[#155dfc]" />}
+                                    {isSelected && <Check className="w-4 h-4 shrink-0 text-[#7D3FD0]" />}
                                 </button>
                             );
                         })
@@ -174,7 +174,7 @@ export function SearchableSelect({
 
                 {/* Footer count */}
                 {!isLoading && filtered.length > 0 && (
-                    <div className="px-3 py-1.5 border-t border-[#e5e7eb] bg-[#f8f9fa] text-[11px] text-[#adadad]">
+                    <div className="px-3 py-1.5 border-t border-[#f0f0f0] bg-[#faf8ff] text-[11px] text-[#9ca3af] font-medium">
                         {filtered.length} of {options.length} results
                     </div>
                 )}

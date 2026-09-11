@@ -119,8 +119,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const rawRole = loggedUser?.role;
         const roleArray = Array.isArray(rawRole) ? rawRole : [rawRole || ""];
         const role = roleArray.map((r: string) => r.toUpperCase());
-        console.log(role, "rolerole")
-        if (role.includes("ACADEMY ADMIN") || role.includes("CLUB USER")) {
+        if (role.includes("ACADEMY ADMIN") || role.includes("CLUB USER") || role.includes("CLUB ADMIN")) {
             router.push("/dashboard");
         }
         else {
@@ -173,4 +172,4 @@ export function useAuth() {
         throw new Error("useAuth must be used within an AuthProvider");
     }
     return context;
-}
+} 

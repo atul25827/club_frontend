@@ -11,8 +11,8 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Meril Academy | Event Experiences That Stay With You",
-  description: "Discover inspiring venues and curated details that make meetings memorable—plan your next event at Meril Academy.",
+  title: "Meril Club Booking",
+  // description: "Discover inspiring venues and curated details that make meetings memorable—plan your next event at Meril Academy.",
 };
 
 export default function RootLayout({

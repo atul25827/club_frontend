@@ -61,6 +61,7 @@ export interface LookupItem {
 }
 
 export interface ClubMasterData {
+    guest_region: LookupItem[];
     booking_for: LookupItem[];
     food_preferences: LookupItem[];
     meal_type: LookupItem[];

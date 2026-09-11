@@ -306,6 +306,7 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
                         data={tab1}
                         errors={tab1Errors}
                         onChange={handleTab1Change}
+                        masterData={masterData}
                     />
                 )}
 
@@ -369,42 +370,57 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
 
             {/* ── Submission Confirmation Dialog ── */}
             <Dialog open={showConfirmModal} onOpenChange={setShowConfirmModal}>
-                <DialogContent className="sm:max-w-[400px] rounded-2xl p-0 overflow-hidden border-none shadow-2xl">
-                    <div className="bg-[#7D3FD0] h-2 w-full" />
-                    <div className="p-6 pt-4">
+                <DialogContent className="sm:max-w-[420px] rounded-xl p-0 border border-gray-200 shadow-lg">
+
+                    <div className="p-6">
                         <DialogHeader>
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="p-2 bg-purple-50 rounded-lg">
-                                    <CheckCircle2 className="w-5 h-5 text-[#7D3FD0]" />
+                            <div className="flex items-start gap-3 mb-3">
+
+                                {/* Subtle Icon */}
+                                <div className="p-2 bg-gray-100 rounded-md">
+                                    <CheckCircle2 className="w-5 h-5 text-gray-700" />
                                 </div>
-                                <DialogTitle className="text-xl font-bold text-gray-900">Ready to Submit?</DialogTitle>
+
+                                <div>
+                                    <DialogTitle className="text-lg font-semibold text-gray-900">
+                                        Confirm Submission
+                                    </DialogTitle>
+                                    <DialogDescription className="text-sm text-gray-500 mt-1 leading-relaxed">
+                                        Please review your details before submitting. This action will start the approval process.
+                                    </DialogDescription>
+                                </div>
+
                             </div>
-                            <DialogDescription className="text-gray-500 text-[14px] leading-relaxed">
-                                You are about to finalize this booking. Please ensure all details are correct as this will initiate the approval workflow.
-                            </DialogDescription>
                         </DialogHeader>
-                        <DialogFooter className="mt-8 gap-3 sm:justify-end">
-                            <Button 
-                                variant="ghost" 
+
+                        <DialogFooter className="mt-6 flex justify-end gap-2">
+
+                            {/* Secondary Button */}
+                            <Button
+                                variant="outline"
                                 onClick={() => setShowConfirmModal(false)}
                                 disabled={isSubmitting}
-                                className="text-gray-500 font-bold hover:bg-gray-50 rounded-xl px-6 h-11"
+                                className=" cursor-pointer h-10 px-4 text-sm"
                             >
-                                Not yet
+                                Cancel
                             </Button>
-                            <Button 
+
+                            {/* Primary Button */}
+                            <Button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className="bg-[#7D3FD0] hover:bg-[#6a2eb8] text-white font-bold rounded-xl px-8 h-11 min-w-[140px] shadow-lg shadow-purple-200 transition-all active:scale-95"
+                                className="cursor-pointer h-10 px-5 text-sm bg-[#7D3FD0] hover:bg-[#6a2eb8] text-white font-medium text-[14px] rounded-[8px]  shadow-lg shadow-purple-100 disabled:opacity-50 disabled:grayscale"
                             >
                                 {isSubmitting ? (
                                     <span className="flex items-center gap-2">
-                                         <Loader2 className="w-4 h-4 animate-spin" /> Finalizing
+                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                        Submitting...
                                     </span>
                                 ) : (
-                                    "Yes, Submit"
+                                    "Submit"
                                 )}
                             </Button>
+
                         </DialogFooter>
                     </div>
                 </DialogContent>
