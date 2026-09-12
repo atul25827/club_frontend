@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { LayoutGrid, ClipboardList, Calendar, CheckSquare, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MerilLogo } from "../meril-logo";
+import { NeedHelpModal } from "./need-help-modal";
 
 const sidebarItems = [
     {
@@ -63,13 +64,8 @@ export function AdminSidebar() {
                 })}
             </nav>
 
-            {/* Password / Settings */}
-            {/* <button
-                className="flex flex-col items-center justify-center p-3 rounded-[12px] w-[70px] h-[70px] text-[#5A5A5A] hover:bg-white/50 transition-all duration-200 mt-auto"
-            >
-                <Lock className="h-6 w-6 mb-1" />
-                <span className="text-[10px] font-medium text-center leading-tight">Password</span>
-            </button> */}
+            {/* Need Help Modal */}
+            <NeedHelpModal />
         </aside>
     );
 }

@@ -24,4 +24,7 @@ export const API_ROUTES = {
         getApproverList: "/api/method/academy.api.club_booking.get_approver_club_booking_list",
         updateStatus: "/api/method/academy.api.club_booking.update_club_booking_status",
     },
+    support: {
+        getHelpSettings: "/api/method/academy.api.support.get_help_support_settings",
+    },
 } as const;
