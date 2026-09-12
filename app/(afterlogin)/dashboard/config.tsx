@@ -2,6 +2,16 @@ import { api } from "@/services/api";
 import { BookingStatsType } from "@/types";
 import { Calendar, CalendarCheck, Clock, XSquare, Ban, LucideIcon } from "lucide-react";
 
+const formatDate = (dateStr: string) => {
+    if (!dateStr) return "-";
+    const justDate = dateStr.split("T")[0].split(" ")[0];
+    const parts = justDate.split("-");
+    if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+    }
+    return dateStr;
+};
+
 export interface DashboardColumn {
     header: string;
     key: string;
@@ -61,8 +71,8 @@ export const DASHBOARD_REGISTRY: DashboardDefinition[] = [
                 )
             },
             { header: "Event Name", key: "event_name" },
-            { header: "From Date", key: "from_date" },
-            { header: "To Date", key: "to_date" },
+            { header: "From Date", key: "from_date", render: (row) => formatDate(row.from_date) },
+            { header: "To Date", key: "to_date", render: (row) => formatDate(row.to_date) },
             { header: "Created By", key: "full_name" },
             { header: "Status", key: "booking_status" },
         ]
@@ -97,8 +107,8 @@ export const DASHBOARD_REGISTRY: DashboardDefinition[] = [
                 )
             },
             { header: "Event Name", key: "event_name" },
-            { header: "From Date", key: "from_date" },
-            { header: "To Date", key: "to_date" },
+            { header: "From Date", key: "from_date", render: (row) => formatDate(row.from_date) },
+            { header: "To Date", key: "to_date", render: (row) => formatDate(row.to_date) },
             { header: "Created By", key: "full_name" },
             { header: "Status", key: "booking_status" },
         ]
@@ -165,8 +175,8 @@ export const LIST_REGISTRY: ListDefinition[] = [
             { header: "Guest Region", key: "guest_region" },
             { header: "Requester Name", key: "full_name" },
             { header: "Event Title", key: "event_name" },
-            { header: "Start Date", key: "from_date" },
-            { header: "End Date", key: "to_date" },
+            { header: "Start Date", key: "from_date", render: (row) => formatDate(row.from_date) },
+            { header: "End Date", key: "to_date", render: (row) => formatDate(row.to_date) },
             { header: "Created By", key: "full_name" },
             { header: "Booking Status", key: "booking_status" },
             { header: "Approval Status", key: "approval_status" },
@@ -198,8 +208,8 @@ export const LIST_REGISTRY: ListDefinition[] = [
             },
             { header: "Guest Region", key: "guest_region" },
             { header: "Event Title", key: "event_name" },
-            { header: "Start Date", key: "from_date" },
-            { header: "End Date", key: "to_date" },
+            { header: "Start Date", key: "from_date", render: (row) => formatDate(row.from_date) },
+            { header: "End Date", key: "to_date", render: (row) => formatDate(row.to_date) },
             { header: "Created By", key: "full_name" },
             { header: "Booking Status", key: "booking_status" },
         ],

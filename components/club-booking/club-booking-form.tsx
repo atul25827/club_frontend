@@ -62,7 +62,6 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
         if (!isBackground) setIsLoading(true);
         try {
             const data = await api.getClubBookingDetails(id);
-            console.log("data", data);
             if (data) {
                 setBookingId(data.name || data.club_booking_id || id);
                 setTab1({

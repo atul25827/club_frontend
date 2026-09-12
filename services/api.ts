@@ -14,6 +14,19 @@ export const api = {
         }
     },
 
+    async getHelpSupportSettings(app_name: string) {
+        try {
+            const json = await clientFetch(API_ROUTES.support.getHelpSettings, {
+                method: "POST",
+                body: { app_name },
+            });
+            return json.message;
+        } catch (error) {
+            console.error("Error fetching support settings:", error);
+            return null;
+        }
+    },
+
     async login(usr: string, pwd: string): Promise<{ data?: any; error?: string }> {
         try {
             const json = await clientFetch(API_ROUTES.auth.login, {
