@@ -35,10 +35,10 @@ export function useAuth() {
     //     }
     // }, []);
 
-    const forgotPassword = useCallback(async (email: string) => {
+    const forgotPassword = useCallback(async (email: string, app_name: string = "club") => {
         setLoading(true);
         try {
-            const response = await api.forgotPassword(email);
+            const response = await api.forgotPassword(email, app_name);
             if (response.error) throw new Error(response.error);
             return response.data;
         } finally {
