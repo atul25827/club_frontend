@@ -276,11 +276,11 @@ export const api = {
         }
     },
 
-    async forgotPassword(email: string): Promise<{ data?: any; error?: string }> {
+    async forgotPassword(email: string, app_name: string): Promise<{ data?: any; error?: string }> {
         try {
             const json = await clientFetch(API_ROUTES.auth.forgotPassword, {
                 method: "POST",
-                body: { email },
+                body: { email, app_name },
                 skipAuth: true,
             });
             return { data: json };
