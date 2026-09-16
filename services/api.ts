@@ -47,6 +47,23 @@ export const api = {
         }
     },
 
+    async changePassword(data: any): Promise<{ data?: any; error?: string }> {
+        try {
+            const json = await clientFetch(API_ROUTES.auth.changePassword, {
+                method: "POST",
+                body: data,
+            });
+            // Based on API specs, error responses (e.g. 401, 400) might throw an error or return json with error status.
+            // Adjust depending on how clientFetch handles non-2xx responses.
+            if (json.status === "error") {
+                return { error: json.message };
+            }
+            return { data: json };
+        } catch (error: any) {
+            return { error: error.message || "Failed to change password" };
+        }
+    },
+
     // ─── Master Data ────────────────────────────────────────────────────────
 
     async getClubMasterData(): Promise<ClubMasterData | null> {
@@ -228,26 +245,112 @@ export const api = {
         }
     },
 
-    // async exportBookings(
-    //     page: number,
-    //     limit: number,
-    //     filters: { status?: string; academy?: string; hall?: string; search?: string }
-    // ): Promise<{ data: any[]; total_count: number }> {
-    //     try {
-    //         const json = await clientFetch(API_ROUTES.booking.getExport, {
-    //             params: {
-    //                 page: String(page),
-    //                 limit: String(limit),
-    //                 ...(filters.status && filters.status !== "all" ? { status: filters.status } : {}),
-    //                 ...(filters.academy && filters.academy !== "all" ? { academy: filters.academy } : {}),
-    //                 ...(filters.hall && filters.hall !== "all" ? { hall: filters.hall } : {}),
-    //                 ...(filters.search ? { search: filters.search } : {}),
-    //             },
-    //         });
-    //         return { data: json.message?.data ?? [], total_count: json.message?.total_count ?? 0 };
-    //     } catch (error) {
-    //         console.error("Error exporting bookings:", error);
-    //         return { data: [], total_count: 0 };
-    //     }
-    // },
+    async getClubBookingAuditTrail(booking_id: string): Promise<any[]> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubBooking.getAuditTrail, {
+                params: { booking_id },
+            });
+            return json.message || [];
+        } catch (error) {
+            console.error("Error fetching club booking audit trail:", error);
+            return [];
+        }
+    },
+
+    async exportClubBookings(
+        filters: { status?: string; search_name?: string } = {}
+    ): Promise<{ data: any[]; total_count: number }> {
+        try {
+            const params: any = {};
+            if (filters.status && filters.status !== "all") params.status = filters.status;
+            if (filters.search_name) params.search_name = filters.search_name;
+
+            const json = await clientFetch(API_ROUTES.clubBooking.getExport, {
+                params,
+            });
+            const data = json.message?.data ?? json.message ?? [];
+            return { data: Array.isArray(data) ? data : [], total_count: Array.isArray(data) ? data.length : 0 };
+        } catch (error) {
+            console.error("Error exporting club bookings:", error);
+            return { data: [], total_count: 0 };
+        }
+    },
+
+    async forgotPassword(email: string): Promise<{ data?: any; error?: string }> {
+        try {
+            const json = await clientFetch(API_ROUTES.auth.forgotPassword, {
+                method: "POST",
+                body: { email },
+                skipAuth: true,
+            });
+            return { data: json };
+        } catch (error: any) {
+            return { error: error.message || "Request failed" };
+        }
+    },
+
+    async resetPassword(data: any): Promise<{ data?: any; error?: string }> {
+        try {
+            const json = await clientFetch(API_ROUTES.auth.resetPassword, {
+                method: "POST",
+                body: data,
+                skipAuth: true,
+            });
+            return { data: json };
+        } catch (error: any) {
+            return { error: error.message || "Password reset failed" };
+        }
+    },
+
+    async verifyResetToken(token: string): Promise<{ data?: any; error?: string }> {
+        try {
+            const json = await clientFetch(API_ROUTES.auth.verifyResetToken, {
+                method: "GET",
+                params: { token },
+                skipAuth: true,
+            });
+            return { data: json };
+        } catch (error: any) {
+            return { error: error.message || "Verification failed" };
+        }
+    },
+
+    async registerUser(data: any): Promise<{ data?: any; error?: string }> {
+        try {
+            const json = await clientFetch(API_ROUTES.auth.registerUser, {
+                method: "POST",
+                body: data,
+                skipAuth: true,
+            });
+            return { data: json };
+        } catch (error: any) {
+            return { error: error.message || "Registration failed" };
+        }
+    },
+
+    async sendSignupOtp(email: string, employee_code: string): Promise<{ data?: any; error?: string }> {
+        try {
+            const json = await clientFetch(API_ROUTES.auth.sendSignupOtp, {
+                method: "POST",
+                body: { email, employee_code },
+                skipAuth: true,
+            });
+            return { data: json };
+        } catch (error: any) {
+            return { error: error.message || "Failed to send OTP" };
+        }
+    },
+
+    async verifySignupOtp(email: string, otp: string, employee_code: string): Promise<{ data?: any; error?: string }> {
+        try {
+            const json = await clientFetch(API_ROUTES.auth.verifySignupOtp, {
+                method: "POST",
+                body: { email, otp, employee_code },
+                skipAuth: true,
+            });
+            return { data: json };
+        } catch (error: any) {
+            return { error: error.message || "Failed to verify OTP" };
+        }
+    },
 };

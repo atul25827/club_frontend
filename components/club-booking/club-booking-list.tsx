@@ -6,11 +6,14 @@ import { useEffect, useState, useCallback } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { MapPin, Calendar, Search, Plus } from "lucide-react";
+import { MapPin, Calendar, Search, Plus, Download, Loader2 } from "lucide-react";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { ListDefinition } from "@/app/(afterlogin)/dashboard/config";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useBookingExport } from "@/hooks/use-booking-export";
+import { formatClubBookingForExport } from "@/lib/excel-export";
+import { api } from "@/services/api";
 import {
     Pagination,
     PaginationContent,
@@ -39,6 +42,16 @@ export function ClubBookingList({ config, onViewDetails }: ClubBookingListProps)
     // Filters
     const [searchTerm, setSearchTerm] = useState("");
     const [statusFilter, setStatusFilter] = useState(searchParams?.get("status") || "all");
+
+    // Export
+    const { handleExport, isExporting } = useBookingExport(
+        async (_page, _limit, filters) => {
+            const result = await api.exportClubBookings(filters);
+            return { data: result?.data || [], total_count: result?.total_count || 0 };
+        },
+        formatClubBookingForExport,
+        "Club_Bookings"
+    );
 
     // Sync searchParams to state if it changes
     useEffect(() => {
@@ -123,6 +136,20 @@ export function ClubBookingList({ config, onViewDetails }: ClubBookingListProps)
                             <SelectItem value="Awaiting">Awaiting Approval</SelectItem>
                         </SelectContent>
                     </Select>
+
+                    <Button
+                        variant="outline"
+                        onClick={() => handleExport({ status: statusFilter, search_name: searchTerm })}
+                        disabled={isExporting}
+                        className="w-full md:w-auto h-[44px] rounded-[8px] border-[#D0D5DD] text-[#344054] font-bold gap-2 px-5 transition-all active:scale-95 cursor-pointer"
+                    >
+                        {isExporting ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                            <Download className="h-4 w-4" />
+                        )}
+                        {isExporting ? "Exporting..." : "Export"}
+                    </Button>
 
                     <Link href="/club-booking">
                         <Button className="w-full md:w-auto h-[44px] rounded-[8px] bg-[#7D3FD0] hover:bg-[#6a2eb8] text-white font-bold gap-2 px-6 shadow-lg shadow-purple-100 transition-all active:scale-95">

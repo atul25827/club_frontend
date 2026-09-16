@@ -16,7 +16,9 @@ export function AdminLayoutContent({
         // if (path.includes("/club-booking") && path.split("/").length > 3) return "Booking Details"; // /admin/bookings/123
         if (path.includes("/club-booking-list")) return "All Bookings";
         if (path.endsWith("/club-booking")) return "Create Booking"; // /admin/booking
-        if (path.includes("/reports")) return "Reports";
+        if (path.includes("/tutorial")) return "Tutorial";
+        if (path.includes("/change-password")) return "Change Password";
+
         return "Dashboard";
     };
 

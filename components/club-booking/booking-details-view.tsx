@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { StatusBadge } from "@/components/ui/status-badge";
+import { BookingAuditTrail } from './booking-audit-trail';
 import { format } from "date-fns";
 import {
     Table,
@@ -77,6 +78,23 @@ export function BookingDetailsView({ booking }: { booking: any }) {
     const [actionToPerform, setActionToPerform] = useState<'Approve' | 'Reject' | null>(null);
     const [remarks, setRemarks] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [auditLogs, setAuditLogs] = useState<any[]>([]);
+
+    useEffect(() => {
+        if (booking?.name) {
+            api.getClubBookingAuditTrail(booking.name).then((data: any) => {
+                let logs = [];
+                if (Array.isArray(data)) {
+                    logs = data;
+                } else if (data && Array.isArray(data.message)) {
+                    logs = data.message;
+                } else if (data && Array.isArray(data.data)) {
+                    logs = data.data;
+                }
+                setAuditLogs(logs);
+            });
+        }
+    }, [booking?.name]);
 
     const formatDate = (dateStr: string) => {
         if (!dateStr) return "—";
@@ -159,7 +177,8 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                 </div>
 
 
-                <div className="flex gap-3 ml-4">
+                <div className="flex items-center gap-3 ml-4">
+                    <BookingAuditTrail bookingId={booking?.name || booking?.club_booking_id} auditLogs={auditLogs} />
                     <Link href="/club-booking-list" className="inline-flex items-center text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">
 
                         <Button
