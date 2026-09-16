@@ -7,6 +7,14 @@ export const API_ROUTES = {
         login: "/api/method/academy.api.auth.login",
         logout: "/api/method/logout",
         getLoggedUser: "/api/method/academy.api.auth.get_logged_user",
+        orgotPassword: "/api/method/academy.api.auth.forgot_password",
+        verifyResetToken: "/api/method/academy.api.auth.verify_reset_token",
+        resetPassword: "/api/method/academy.api.auth.reset_password",
+        registerUser: "/api/method/academy.api.auth.register_user",
+        sendSignupOtp: "/api/method/academy.api.auth.send_signup_otp",
+        verifySignupOtp: "/api/method/academy.api.auth.verify_signup_otp",
+        forgotPassword: "/api/method/academy.api.auth.forgot_password",
+        changePassword: "/api/method/academy.api.auth.change_user_password",
     },
     clubMasterData: {
         get: "/api/method/academy.api.club_master_data.get_club_masters",
@@ -23,8 +31,11 @@ export const API_ROUTES = {
         getClubApproverStats: "/api/method/academy.api.club_booking.get_approver_club_stats",
         getApproverList: "/api/method/academy.api.club_booking.get_approver_club_booking_list",
         updateStatus: "/api/method/academy.api.club_booking.update_club_booking_status",
+        getAuditTrail: "/api/method/academy.api.club_booking.get_club_booking_audit_trail",
+        getExport: "/api/method/academy.api.club_booking.get_club_booking_export",
     },
     support: {
         getHelpSettings: "/api/method/academy.api.support.get_help_support_settings",
+        fetchTutorialVideos: "/api/method/academy.api.support.fetch_tutorial_videos",
     },
 } as const;

@@ -44,7 +44,7 @@ export async function getSession(cookieHeader: string): Promise<SessionResult> {
             id: profile.user_id,
             name: profile.full_name || profile.user_id,
             email: profile.email || profile.user_id,
-            role: profile.role || ["Academy User"],
+            role: profile.role || ["Club User"],
             employeeCode: profile.employee_code,
             avatarUrl: profile.image,
         };

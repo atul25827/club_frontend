@@ -12,12 +12,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { useRouter } from "next/navigation";
+
 interface AdminHeaderProps {
     title: string;
 }
 
 export function AdminHeader({ title }: AdminHeaderProps) {
     const { user, logout } = useAuth();
+    const router = useRouter();
 
     // Default to Admin User if no user in context (for dev/mock)
     const displayUser = user || { name: "", role: "" };
@@ -29,7 +32,7 @@ export function AdminHeader({ title }: AdminHeaderProps) {
             <div className="flex items-center gap-4">
                 <div className="text-right hidden sm:block">
                     <p className="text-sm font-medium text-[#271E4A]">{displayUser.name}</p>
-                    <p className="text-xs text-gray-500">{(Array.isArray(displayUser.role) ? displayUser.role : [displayUser.role || ""]).includes("Academy Admin") || (Array.isArray(displayUser.role) ? displayUser.role : [displayUser.role || ""]).includes("ACADEMY ADMIN") ? "Approver" : ""}</p>
+                    <p className="text-xs text-gray-500">{(Array.isArray(displayUser.role) ? displayUser.role : [displayUser.role || ""]).includes("Club Admin") || (Array.isArray(displayUser.role) ? displayUser.role : [displayUser.role || ""]).includes("CLUB ADMIN") ? "Approver" : "Requestor"}</p>
                 </div>
 
                 <DropdownMenu>
@@ -44,10 +47,10 @@ export function AdminHeader({ title }: AdminHeaderProps) {
                     <DropdownMenuContent align="end" className="w-56">
                         <DropdownMenuLabel>My Account</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        {/* <DropdownMenuItem className="cursor-pointer">
+                        <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/change-password")}>
                             <KeyRound className="mr-2 h-4 w-4" />
                             <span>Change Password</span>
-                        </DropdownMenuItem> */}
+                        </DropdownMenuItem>
                         <DropdownMenuItem className="cursor-pointer text-red-600 focus:text-red-600" onClick={logout}>
                             <LogOut className="mr-2 h-4 w-4" />
                             <span>Log out</span>

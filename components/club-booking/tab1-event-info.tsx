@@ -34,6 +34,8 @@ interface Tab1Props {
 }
 
 export function Tab1EventInfo({ data, errors, onChange, masterData }: Tab1Props) {
+    const today = new Date().toISOString().split("T")[0];
+
     // Parse comma-separated string to array for MultiSelect
     const selectedRegions = data.guest_region
         ? data.guest_region.split(",").map((s) => s.trim()).filter(Boolean)
@@ -73,6 +75,7 @@ export function Tab1EventInfo({ data, errors, onChange, masterData }: Tab1Props)
                 <Input
                     type="date"
                     value={data.from_date}
+                    min={today}
                     onChange={(e) => onChange("from_date", e.target.value)}
                     className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]"
                 />
@@ -83,7 +86,7 @@ export function Tab1EventInfo({ data, errors, onChange, masterData }: Tab1Props)
                 <Input
                     type="date"
                     value={data.to_date}
-                    min={data.from_date || undefined}
+                    min={data.from_date || today}
                     onChange={(e) => onChange("to_date", e.target.value)}
                     className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]"
                 />

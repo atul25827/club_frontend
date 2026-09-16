@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutGrid, ClipboardList, Calendar, CheckSquare, Lock } from "lucide-react";
+import { LayoutGrid, ClipboardList, Calendar, CheckSquare, Lock, Book } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MerilLogo } from "../meril-logo";
 import { NeedHelpModal } from "./need-help-modal";
@@ -23,11 +23,11 @@ const sidebarItems = [
         href: "/club-booking",
         icon: ClipboardList,
     },
-    // {
-    //     title: "Reports",
-    //     href: "/calendar",
-    //     icon: Calendar,
-    // },
+    {
+        title: "Tutorial",
+        href: "/tutorial",
+        icon: Book,
+    },
 ];
 
 export function AdminSidebar() {

@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             // 2. Refresh standard user data natively via JS to hydrate UI immediately
             const profile = await api.getLoggedUser();
             if (profile) {
-                const fetchedRole = profile.role || ["Academy User"];
+                const fetchedRole = profile.role || ["Club User"];
                 const userData: User = {
                     id: profile.user_id,
                     name: profile.full_name || profile.user_id,
