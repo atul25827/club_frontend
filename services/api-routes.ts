@@ -20,6 +20,7 @@ export const API_ROUTES = {
         get: "/api/method/academy.api.club_master_data.get_club_masters",
         getCountries: "/api/method/academy.api.club_master_data.get_countries",
         getStates: "/api/method/academy.api.club_master_data.get_states",
+        getCities: "/api/method/academy.api.club_master_data.get_cities",
     },
     clubBooking: {
         create: "/api/method/academy.api.club_booking.create_booking",
@@ -33,6 +34,15 @@ export const API_ROUTES = {
         updateStatus: "/api/method/academy.api.club_booking.update_club_booking_status",
         getAuditTrail: "/api/method/academy.api.club_booking.get_club_booking_audit_trail",
         getExport: "/api/method/academy.api.club_booking.get_club_booking_export",
+    },
+    masterData: {
+        getDistributorList: "/api/method/academy.api.master_data.get_distributor_list",
+        getAccountList: "/api/method/academy.api.master_data.get_account_list",
+        getContactList: "/api/method/academy.api.master_data.get_contact_list",
+        getAccountsByContact: "/api/method/academy.api.master_data.get_accounts_by_contact",
+        saveAccount: "/api/method/academy.api.master_data.save_account",
+        saveContact: "/api/method/academy.api.master_data.save_contact",
+        saveDistributor: "/api/method/academy.api.master_data.save_distributor",
     },
     support: {
         getHelpSettings: "/api/method/academy.api.support.get_help_support_settings",

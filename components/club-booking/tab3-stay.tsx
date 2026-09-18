@@ -7,12 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SearchableSelect } from "@/components/ui/searchable-select";
-import { Plus, BedDouble, Trash2, Loader2 } from "lucide-react";
+import { MasterDataSelect } from "./master-data-select";
+import { AddDistributorDialog, AddContactDialog, AddAccountDialog } from "./add-entity-dialog";
+import { Plus, BedDouble, Trash2, Loader2, Building2, Stethoscope, User } from "lucide-react";
 import { api } from "@/services/api";
 import { formatDisplayDate, toFrappeDatetime } from "@/lib/date-utils";
 import { validateTab3Draft, toErrorMap, type Tab3Draft } from "@/lib/booking-validation";
 import type { StayEntry } from "@/types/club-booking.types";
-import type { Country, State } from "@/types";
+import type { Country, State, MasterDataOption } from "@/types";
 
 // ─── Reusable Field wrapper ───────────────────────────────────────────────────
 
@@ -33,11 +35,14 @@ function Field({ label, required, error, children }: {
 // ─── Empty draft ──────────────────────────────────────────────────────────────
 
 const emptyDraft: Tab3Draft = {
-    distributor_or_guest_name: "",
+    guest_type: "",
+    guest_name: "",
+    distributor_name: "",
+    account_name: "",
+    contact_name: "",
     designation: "",
     check_in_date: "",
     check_out_date: "",
-    firm_or_hospital_name: "",
     repeat_guest: "",
     state: "",
     country: "",
@@ -65,6 +70,16 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
     const [states, setStates] = useState<State[]>([]);
     const [isStateLoading, setIsStateLoading] = useState(false);
 
+    // Display labels
+    const [distributorLabel, setDistributorLabel] = useState("");
+    const [contactLabel, setContactLabel] = useState("");
+    const [accountLabel, setAccountLabel] = useState("");
+
+    // Add-new dialog states
+    const [showAddDistributor, setShowAddDistributor] = useState(false);
+    const [showAddContact, setShowAddContact] = useState(false);
+    const [showAddAccount, setShowAddAccount] = useState(false);
+
     useEffect(() => {
         setIsCountryLoading(true);
         api.getCountries().then(setCountries).finally(() => setIsCountryLoading(false));
@@ -83,6 +98,37 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
         api.getCountries(term || undefined).then(setCountries).finally(() => setIsCountryLoading(false));
     }, []);
 
+    // Auto-fetch account when doctor/contact is selected
+    useEffect(() => {
+        if (draft.guest_type === "Doctor" && draft.contact_name) {
+            api.getAccountsByContact(draft.contact_name).then((accounts) => {
+                if (accounts.length > 0) {
+                    setDraft((d) => ({ ...d, account_name: accounts[0].value }));
+                    setAccountLabel(accounts[0].label);
+                }
+            });
+        }
+    }, [draft.contact_name, draft.guest_type]);
+
+    // Reset guest-type-dependent fields when guest type changes
+    useEffect(() => {
+        setDraft((d) => ({
+            ...d,
+            guest_name: "",
+            distributor_name: "",
+            contact_name: "",
+            account_name: "",
+        }));
+        setDistributorLabel("");
+        setContactLabel("");
+        setAccountLabel("");
+    }, [draft.guest_type]);
+
+    // Fetch callbacks
+    const fetchDistributors = useCallback((search?: string) => api.getDistributorList(search, 20), []);
+    const fetchContacts = useCallback((search?: string) => api.getContactList(search, 20), []);
+    const fetchAccounts = useCallback((search?: string) => api.getAccountList(search, 20), []);
+
     const set = (field: keyof Tab3Draft, value: string) => {
         setDraft((d) => ({ ...d, [field]: value }));
         if (errors[field]) setErrors((e) => { const next = { ...e }; delete next[field]; return next; });
@@ -96,11 +142,14 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
         }
 
         const entry: StayEntry = {
-            distributor_or_guest_name: draft.distributor_or_guest_name,
+            guest_type: draft.guest_type as any,
+            guest_name: draft.guest_type === "Others" ? draft.guest_name || undefined : undefined,
+            distributor_name: draft.distributor_name || undefined,
+            account_name: draft.account_name || undefined,
+            contact_name: draft.contact_name || undefined,
             designation: draft.designation || undefined,
             check_in_date: toFrappeDatetime(draft.check_in_date) || "",
             check_out_date: toFrappeDatetime(draft.check_out_date) || "",
-            firm_or_hospital_name: draft.firm_or_hospital_name || undefined,
             repeat_guest: (draft.repeat_guest === "Yes" || draft.repeat_guest === "No") ? draft.repeat_guest : undefined,
             state: draft.state || undefined,
             country: draft.country || undefined,
@@ -111,8 +160,39 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
         };
 
         onAdd(entry);
-        setDraft(emptyDraft);
+        setDraft({ ...emptyDraft });
+        setDistributorLabel("");
+        setContactLabel("");
+        setAccountLabel("");
         setErrors({});
+    };
+
+    // ── Helper: get display name ──
+    const getDisplayName = (entry: StayEntry) => {
+        if (entry.guest_type === "Others") return entry.guest_name || "—";
+        if (entry.guest_type === "Distributor") return entry.guest_name || entry.distributor_name || "—";
+        if (entry.guest_type === "Doctor") return entry.guest_name || entry.contact_name || "—";
+        return entry.guest_name || entry.distributor_or_guest_name || "—";
+    };
+
+    const getHospitalAccount = (entry: StayEntry) => {
+        return entry.account_name || entry.firm_or_hospital_name || "—";
+    };
+
+    // ── Guest type badge ──
+    const getGuestTypeBadge = (guestType?: string) => {
+        if (!guestType) return <span className="text-[#9ca3af]">—</span>;
+        const config: Record<string, { bg: string; text: string }> = {
+            Distributor: { bg: "bg-green-50", text: "text-green-700" },
+            Doctor: { bg: "bg-blue-50", text: "text-blue-700" },
+            Others: { bg: "bg-gray-100", text: "text-gray-600" },
+        };
+        const c = config[guestType] || { bg: "bg-gray-100", text: "text-gray-600" };
+        return (
+            <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${c.bg} ${c.text}`}>
+                {guestType}
+            </span>
+        );
     };
 
     return (
@@ -120,84 +200,170 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
             {/* Input Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-6">
 
-                <Field label="Distributors/Guest Name" required error={errors.distributor_or_guest_name}>
-                    <Input placeholder="Enter Name" value={draft.distributor_or_guest_name}
-                        onChange={(e) => set("distributor_or_guest_name", e.target.value)}
-                        className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                </Field>
-
-                <Field label="Designation" error={errors.designation}>
-                    <Input placeholder="Enter Designation" value={draft.designation}
-                        onChange={(e) => set("designation", e.target.value)}
-                        className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                </Field>
-
-                <Field label="Firm/Hospital Name" error={errors.firm_or_hospital_name}>
-                    <Input placeholder="Enter Firm/Hospital Name" value={draft.firm_or_hospital_name}
-                        onChange={(e) => set("firm_or_hospital_name", e.target.value)}
-                        className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                </Field>
-
-                <Field label="Check In Date and Time" required error={errors.check_in_date}>
-                    <Input type="datetime-local" value={draft.check_in_date}
-                        onChange={(e) => set("check_in_date", e.target.value)}
-                        className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                </Field>
-
-                <Field label="Check Out Date Time" required error={errors.check_out_date}>
-                    <Input type="datetime-local" value={draft.check_out_date}
-                        min={draft.check_in_date || undefined}
-                        onChange={(e) => set("check_out_date", e.target.value)}
-                        className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                </Field>
-
-                <Field label="Repeat Guest" error={errors.repeat_guest}>
-                    <Select value={draft.repeat_guest} onValueChange={(v) => set("repeat_guest", v)}>
+                {/* ── Guest Type Select ── */}
+                <Field label="Guest Type" required error={errors.guest_type}>
+                    <Select value={draft.guest_type} onValueChange={(v) => set("guest_type", v)}>
                         <SelectTrigger className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]">
-                            <SelectValue placeholder="Select" />
+                            <SelectValue placeholder="Select Guest Type" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="Yes">Yes</SelectItem>
-                            <SelectItem value="No">No</SelectItem>
+                            <SelectItem value="Distributor">
+                                <span className="flex items-center gap-2"><Building2 className="w-3.5 h-3.5 text-green-600" /> Distributor</span>
+                            </SelectItem>
+                            <SelectItem value="Doctor">
+                                <span className="flex items-center gap-2"><Stethoscope className="w-3.5 h-3.5 text-blue-600" /> Doctor</span>
+                            </SelectItem>
+                            <SelectItem value="Others">
+                                <span className="flex items-center gap-2"><User className="w-3.5 h-3.5 text-gray-500" /> Others</span>
+                            </SelectItem>
                         </SelectContent>
                     </Select>
                 </Field>
 
-                <Field label="Country" error={errors.country}>
-                    <SearchableSelect options={countries} value={draft.country}
-                        onChange={(v) => set("country", v)}
-                        onSearch={handleCountrySearch}
-                        placeholder="Select Country" searchPlaceholder="Search country..."
-                        emptyMessage="No countries available" loadingMessage="Loading..."
-                        isLoading={isCountryLoading} />
-                </Field>
+                {/* ── Conditional fields based on Guest Type ── */}
+                {draft.guest_type === "Distributor" && (
+                    <>
+                        <Field label="Distributor" required error={errors.distributor_name}>
+                            <MasterDataSelect
+                                value={draft.distributor_name}
+                                displayLabel={distributorLabel}
+                                onChange={(val, label) => { set("distributor_name", val); setDistributorLabel(label); }}
+                                fetchOptions={fetchDistributors}
+                                onAddNew={() => setShowAddDistributor(true)}
+                                addNewLabel="+ Add New Distributor"
+                                placeholder="Search Distributor"
+                                searchPlaceholder="Search distributor..."
+                                emptyMessage="No distributors found"
+                                icon={<Building2 className="w-4 h-4 text-green-500" />}
+                            />
+                        </Field>
+                        <Field label="Hospital / Account" error={errors.account_name}>
+                            <MasterDataSelect
+                                value={draft.account_name}
+                                displayLabel={accountLabel}
+                                onChange={(val, label) => { set("account_name", val); setAccountLabel(label); }}
+                                fetchOptions={fetchAccounts}
+                                onAddNew={() => setShowAddAccount(true)}
+                                addNewLabel="+ Add New Account"
+                                placeholder="Search Hospital/Account"
+                                searchPlaceholder="Search account..."
+                                emptyMessage="No accounts found"
+                            />
+                        </Field>
+                    </>
+                )}
 
-                <Field label="State" error={errors.state}>
-                    <SearchableSelect options={states} value={draft.state}
-                        onChange={(v) => set("state", v)}
-                        placeholder="Select State" searchPlaceholder="Search state..."
-                        emptyMessage={draft.country ? "No states found" : "Select a country first"}
-                        loadingMessage="Loading states..."
-                        isLoading={isStateLoading}
-                        disabled={!draft.country} />
-                </Field>
+                {draft.guest_type === "Doctor" && (
+                    <>
+                        <Field label="Doctor / Contact" required error={errors.contact_name}>
+                            <MasterDataSelect
+                                value={draft.contact_name}
+                                displayLabel={contactLabel}
+                                onChange={(val, label) => { set("contact_name", val); setContactLabel(label); }}
+                                fetchOptions={fetchContacts}
+                                onAddNew={() => setShowAddContact(true)}
+                                addNewLabel="+ Add New Contact"
+                                placeholder="Search Doctor/Contact"
+                                searchPlaceholder="Search contact..."
+                                emptyMessage="No contacts found"
+                                icon={<Stethoscope className="w-4 h-4 text-blue-500" />}
+                            />
+                        </Field>
+                        <Field label="Hospital / Account" error={errors.account_name}>
+                            <MasterDataSelect
+                                value={draft.account_name}
+                                displayLabel={accountLabel}
+                                onChange={(val, label) => { set("account_name", val); setAccountLabel(label); }}
+                                fetchOptions={fetchAccounts}
+                                onAddNew={() => setShowAddAccount(true)}
+                                addNewLabel="+ Add New Account"
+                                placeholder="Auto-fetched / Search"
+                                searchPlaceholder="Search account..."
+                                emptyMessage="No accounts found"
+                            />
+                        </Field>
+                    </>
+                )}
 
-                {/* Remark + Add button */}
-                <Field label="Remark" error={errors.remark}>
-                    <div className="flex gap-3">
-                        <Input placeholder="Remark" value={draft.remark}
-                            onChange={(e) => set("remark", e.target.value)}
+                {draft.guest_type === "Others" && (
+                    <Field label="Guest Name" required error={errors.guest_name}>
+                        <Input placeholder="Enter Guest Name" value={draft.guest_name}
+                            onChange={(e) => set("guest_name", e.target.value)}
                             className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                        <Button
-                            type="button"
-                            onClick={handleAdd}
-                            disabled={isSubmitting}
-                            className="h-[42px] w-[42px] shrink-0 bg-[#7D3FD0] hover:bg-[#6a2eb8] p-0 rounded-[8px]"
-                        >
-                            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-6 w-6" />}
-                        </Button>
-                    </div>
-                </Field>
+                    </Field>
+                )}
+
+                {/* Common fields — show when guest type is selected */}
+                {draft.guest_type && (
+                    <>
+                        <Field label="Designation" error={errors.designation}>
+                            <Input placeholder="Enter Designation" value={draft.designation}
+                                onChange={(e) => set("designation", e.target.value)}
+                                className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
+                        </Field>
+
+                        <Field label="Check In Date and Time" required error={errors.check_in_date}>
+                            <Input type="datetime-local" value={draft.check_in_date}
+                                onChange={(e) => set("check_in_date", e.target.value)}
+                                className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
+                        </Field>
+
+                        <Field label="Check Out Date Time" required error={errors.check_out_date}>
+                            <Input type="datetime-local" value={draft.check_out_date}
+                                min={draft.check_in_date || undefined}
+                                onChange={(e) => set("check_out_date", e.target.value)}
+                                className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
+                        </Field>
+
+                        <Field label="Repeat Guest" error={errors.repeat_guest}>
+                            <Select value={draft.repeat_guest} onValueChange={(v) => set("repeat_guest", v)}>
+                                <SelectTrigger className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]">
+                                    <SelectValue placeholder="Select" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Yes">Yes</SelectItem>
+                                    <SelectItem value="No">No</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </Field>
+
+                        <Field label="Country" error={errors.country}>
+                            <SearchableSelect options={countries} value={draft.country}
+                                onChange={(v) => set("country", v)}
+                                onSearch={handleCountrySearch}
+                                placeholder="Select Country" searchPlaceholder="Search country..."
+                                emptyMessage="No countries available" loadingMessage="Loading..."
+                                isLoading={isCountryLoading} />
+                        </Field>
+
+                        <Field label="State" error={errors.state}>
+                            <SearchableSelect options={states} value={draft.state}
+                                onChange={(v) => set("state", v)}
+                                placeholder="Select State" searchPlaceholder="Search state..."
+                                emptyMessage={draft.country ? "No states found" : "Select a country first"}
+                                loadingMessage="Loading states..."
+                                isLoading={isStateLoading}
+                                disabled={!draft.country} />
+                        </Field>
+
+                        {/* Remark + Add button */}
+                        <Field label="Remark" error={errors.remark}>
+                            <div className="flex gap-3">
+                                <Input placeholder="Remark" value={draft.remark}
+                                    onChange={(e) => set("remark", e.target.value)}
+                                    className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
+                                <Button
+                                    type="button"
+                                    onClick={handleAdd}
+                                    disabled={isSubmitting}
+                                    className="h-[42px] w-[42px] shrink-0 bg-[#7D3FD0] hover:bg-[#6a2eb8] p-0 rounded-[8px]"
+                                >
+                                    {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-6 w-6" />}
+                                </Button>
+                            </div>
+                        </Field>
+                    </>
+                )}
             </div>
 
             {/* Stay Entries Table */}
@@ -215,14 +381,14 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
                         No stay entries yet. Fill the form above and click <b>+</b> to add.
                     </div>
                 ) : (
-                    <div className="border border-[#e5e7eb] rounded-[16px] overflow-hidden shadow-sm">
-                        <Table>
+                    <div className="border border-[#e5e7eb] rounded-[16px] overflow-hidden shadow-sm overflow-x-auto">
+                        <Table className="whitespace-nowrap min-w-[1200px]">
                             <TableHeader className="bg-[#f8f9fa]">
                                 <TableRow>
-                                    {/* <TableHead className="font-medium text-[#364153]">Sr.</TableHead> */}
+                                    <TableHead className="font-medium text-[#364153]">Guest Type</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Guest Name</TableHead>
+                                    <TableHead className="font-medium text-[#364153]">Hospital/Account</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Designation</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Hospital/Firm</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Check-in</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Check-out</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Repeat</TableHead>
@@ -235,10 +401,10 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
                             <TableBody>
                                 {entries.map((entry, idx) => (
                                     <TableRow key={entry.name || String(idx)} className="bg-white">
-                                        {/* <TableCell className="text-[#6a7282]">{idx + 1}</TableCell> */}
-                                        <TableCell className="text-[#6a7282] font-medium">{entry.distributor_or_guest_name}</TableCell>
+                                        <TableCell>{getGuestTypeBadge(entry.guest_type)}</TableCell>
+                                        <TableCell className="text-[#6a7282] font-medium">{getDisplayName(entry)}</TableCell>
+                                        <TableCell className="text-[#6a7282] max-w-[200px] truncate" title={getHospitalAccount(entry)}>{getHospitalAccount(entry)}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.designation || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.firm_or_hospital_name || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.check_in_date ? formatDisplayDate(entry.check_in_date) : "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.check_out_date ? formatDisplayDate(entry.check_out_date) : "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.repeat_guest || "-"}</TableCell>
@@ -262,6 +428,23 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
                     </div>
                 )}
             </div>
+
+            {/* ── Add New Dialogs ── */}
+            <AddDistributorDialog
+                open={showAddDistributor}
+                onClose={() => setShowAddDistributor(false)}
+                onCreated={(opt) => { set("distributor_name", opt.value); setDistributorLabel(opt.label); }}
+            />
+            <AddContactDialog
+                open={showAddContact}
+                onClose={() => setShowAddContact(false)}
+                onCreated={(opt) => { set("contact_name", opt.value); setContactLabel(opt.label); }}
+            />
+            <AddAccountDialog
+                open={showAddAccount}
+                onClose={() => setShowAddAccount(false)}
+                onCreated={(opt) => { set("account_name", opt.value); setAccountLabel(opt.label); }}
+            />
         </div>
     );
 }

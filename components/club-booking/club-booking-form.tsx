@@ -165,7 +165,6 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
 
     const handleAddFood = async (entry: FoodCateringEntry) => {
         setIsSubmitting(true);
-        console.log("entry", entry);
         try {
             const payload: Record<string, any> = {
                 club_booking_id: bookingId,

@@ -8,12 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { SearchableSelect } from "@/components/ui/searchable-select";
 import { MultiSelect } from "@/components/ui/multi-select";
-import { Plus, Calendar, Trash2, Loader2 } from "lucide-react";
+import { MasterDataSelect } from "./master-data-select";
+import { AddDistributorDialog, AddContactDialog, AddAccountDialog } from "./add-entity-dialog";
+import { Plus, Calendar, Trash2, Loader2, Building2, Stethoscope, User } from "lucide-react";
 import { api } from "@/services/api";
 import { generateDayOptions, toFrappeDatetime } from "@/lib/date-utils";
 import { validateTab2Draft, toErrorMap, type Tab2Draft } from "@/lib/booking-validation";
 import type { FoodCateringEntry, DayOption } from "@/types/club-booking.types";
-import type { ClubMasterData, Country, State } from "@/types";
+import type { ClubMasterData, Country, State, MasterDataOption } from "@/types";
 
 // ─── Reusable Field wrapper ───────────────────────────────────────────────────
 
@@ -38,9 +40,12 @@ function emptyDraft(booking_for: string): Tab2Draft {
         booking_for,
         day: "",
         total_no_of_guest: "",
-        distributor_or_guest_name: "",
+        guest_type: "",
+        guest_name: "",
+        distributor_name: "",
+        account_name: "",
+        contact_name: "",
         designation: "",
-        firm_or_hospital_name: "",
         repeat_guest: "",
         state: "",
         country: "",
@@ -97,6 +102,16 @@ export function Tab2FoodCatering({
     const [states, setStates] = useState<State[]>([]);
     const [isStateLoading, setIsStateLoading] = useState(false);
 
+    // Display labels for master data selects
+    const [distributorLabel, setDistributorLabel] = useState("");
+    const [contactLabel, setContactLabel] = useState("");
+    const [accountLabel, setAccountLabel] = useState("");
+
+    // Add-new dialog states
+    const [showAddDistributor, setShowAddDistributor] = useState(false);
+    const [showAddContact, setShowAddContact] = useState(false);
+    const [showAddAccount, setShowAddAccount] = useState(false);
+
     // Fetch countries on mount
     useEffect(() => {
         setIsCountryLoading(true);
@@ -116,6 +131,43 @@ export function Tab2FoodCatering({
         setIsCountryLoading(true);
         api.getCountries(term || undefined).then(setCountries).finally(() => setIsCountryLoading(false));
     }, []);
+
+    // Auto-fetch account when doctor/contact is selected
+    useEffect(() => {
+        if (draft.guest_type === "Doctor" && draft.contact_name) {
+            api.getAccountsByContact(draft.contact_name).then((accounts) => {
+                if (accounts.length > 0) {
+                    setDraft((d) => ({ ...d, account_name: accounts[0].value }));
+                    setAccountLabel(accounts[0].label);
+                }
+            });
+        }
+    }, [draft.contact_name, draft.guest_type]);
+
+    // Reset guest-type-dependent fields when guest type changes
+    useEffect(() => {
+        setDraft((d) => ({
+            ...d,
+            guest_name: "",
+            distributor_name: "",
+            contact_name: "",
+            account_name: "",
+        }));
+        setDistributorLabel("");
+        setContactLabel("");
+        setAccountLabel("");
+    }, [draft.guest_type]);
+
+    // Reset entire draft when booking_for changes to prevent saving stale data from other modes
+    useEffect(() => {
+        if (draft.booking_for) {
+            setDraft(emptyDraft(draft.booking_for));
+            setDistributorLabel("");
+            setContactLabel("");
+            setAccountLabel("");
+            setErrors({});
+        }
+    }, [draft.booking_for]);
 
     // Field change handler
     const set = (field: keyof Tab2Draft, value: any) => {
@@ -153,6 +205,11 @@ export function Tab2FoodCatering({
         [masterData?.meal_type]
     );
 
+    // ── Fetch callbacks for master data selects ──
+    const fetchDistributors = useCallback((search?: string) => api.getDistributorList(search, 20), []);
+    const fetchContacts = useCallback((search?: string) => api.getContactList(search, 20), []);
+    const fetchAccounts = useCallback((search?: string) => api.getAccountList(search, 20), []);
+
     // Add entry
     const handleAdd = () => {
         const validationErrors = validateTab2Draft(draft);
@@ -165,9 +222,12 @@ export function Tab2FoodCatering({
             booking_for: draft.booking_for,
             day: draft.day,
             total_no_of_guest: draft.total_no_of_guest ? Number(draft.total_no_of_guest) : undefined,
-            distributor_or_guest_name: draft.distributor_or_guest_name || undefined,
+            guest_type: draft.guest_type as any,
+            guest_name: draft.guest_type === "Others" ? draft.guest_name || undefined : undefined,
+            distributor_name: draft.distributor_name || undefined,
+            account_name: draft.account_name || undefined,
+            contact_name: draft.contact_name || undefined,
             designation: draft.designation || undefined,
-            firm_or_hospital_name: draft.firm_or_hospital_name || undefined,
             repeat_guest: (draft.repeat_guest === "Yes" || draft.repeat_guest === "No") ? draft.repeat_guest : undefined,
             state: draft.state || undefined,
             country: draft.country || undefined,
@@ -186,6 +246,9 @@ export function Tab2FoodCatering({
 
         onAdd(entry);
         setDraft(emptyDraft("")); // Reset to empty
+        setDistributorLabel("");
+        setContactLabel("");
+        setAccountLabel("");
         setErrors({});
     };
 
@@ -223,6 +286,30 @@ export function Tab2FoodCatering({
             );
         }
         return <span className="text-[#9ca3af] text-xs">—</span>;
+    };
+
+    // ── Helper: get guest type badge ──
+    const getGuestTypeBadge = (guestType?: string) => {
+        if (!guestType) return <span className="text-[#9ca3af]">—</span>;
+        const config: Record<string, { bg: string; text: string }> = {
+            Distributor: { bg: "bg-green-50", text: "text-green-700" },
+            Doctor: { bg: "bg-blue-50", text: "text-blue-700" },
+            Others: { bg: "bg-gray-100", text: "text-gray-600" },
+        };
+        const c = config[guestType] || { bg: "bg-gray-100", text: "text-gray-600" };
+        return (
+            <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${c.bg} ${c.text}`}>
+                {guestType}
+            </span>
+        );
+    };
+
+    // ── Helper: resolve display name for table ──
+    const getDisplayName = (entry: FoodCateringEntry) => {
+        if (entry.guest_type === "Others") return entry.guest_name || "—";
+        if (entry.guest_type === "Distributor") return entry.distributor_name || "—";
+        if (entry.guest_type === "Doctor") return entry.contact_name || "—";
+        return entry.guest_name || "—";
     };
 
     return (
@@ -275,27 +362,111 @@ export function Tab2FoodCatering({
                         />
                     </Field>
                 ) : (
-                    <Field label="Distributors/Guest Name" required error={errors.distributor_or_guest_name}>
-                        <Input
-                            placeholder="Distributors/Guest Name"
-                            value={draft.distributor_or_guest_name}
-                            onChange={(e) => set("distributor_or_guest_name", e.target.value)}
-                            className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]"
-                        />
-                    </Field>
+                    <>
+                        {/* ── Guest Type Select ── */}
+                        <Field label="Guest Type" required error={errors.guest_type}>
+                            <Select value={draft.guest_type} onValueChange={(v) => set("guest_type", v)}>
+                                <SelectTrigger className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]">
+                                    <SelectValue placeholder="Select Guest Type" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Distributor">
+                                        <span className="flex items-center gap-2"><Building2 className="w-3.5 h-3.5 text-green-600" /> Distributor</span>
+                                    </SelectItem>
+                                    <SelectItem value="Doctor">
+                                        <span className="flex items-center gap-2"><Stethoscope className="w-3.5 h-3.5 text-blue-600" /> Doctor</span>
+                                    </SelectItem>
+                                    <SelectItem value="Others">
+                                        <span className="flex items-center gap-2"><User className="w-3.5 h-3.5 text-gray-500" /> Others</span>
+                                    </SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </Field>
+
+                        {/* ── Conditional fields based on Guest Type ── */}
+                        {draft.guest_type === "Distributor" && (
+                            <>
+                                <Field label="Distributor" required error={errors.distributor_name}>
+                                    <MasterDataSelect
+                                        value={draft.distributor_name}
+                                        displayLabel={distributorLabel}
+                                        onChange={(val, label) => { set("distributor_name", val); setDistributorLabel(label); }}
+                                        fetchOptions={fetchDistributors}
+                                        onAddNew={() => setShowAddDistributor(true)}
+                                        addNewLabel="Add New Distributor"
+                                        placeholder="Search Distributor"
+                                        searchPlaceholder="Search distributor..."
+                                        emptyMessage="No distributors found"
+                                        icon={<Building2 className="w-4 h-4 text-green-500" />}
+                                    />
+                                </Field>
+                                <Field label="Hospital / Account" error={errors.account_name}>
+                                    <MasterDataSelect
+                                        value={draft.account_name}
+                                        displayLabel={accountLabel}
+                                        onChange={(val, label) => { set("account_name", val); setAccountLabel(label); }}
+                                        fetchOptions={fetchAccounts}
+                                        onAddNew={() => setShowAddAccount(true)}
+                                        addNewLabel="Add New Account"
+                                        placeholder="Search Hospital/Account"
+                                        searchPlaceholder="Search account..."
+                                        emptyMessage="No accounts found"
+                                    />
+                                </Field>
+                            </>
+                        )}
+
+                        {draft.guest_type === "Doctor" && (
+                            <>
+                                <Field label="Doctor / Contact" required error={errors.contact_name}>
+                                    <MasterDataSelect
+                                        value={draft.contact_name}
+                                        displayLabel={contactLabel}
+                                        onChange={(val, label) => { set("contact_name", val); setContactLabel(label); }}
+                                        fetchOptions={fetchContacts}
+                                        onAddNew={() => setShowAddContact(true)}
+                                        addNewLabel="Add New Contact"
+                                        placeholder="Search Doctor/Contact"
+                                        searchPlaceholder="Search contact..."
+                                        emptyMessage="No contacts found"
+                                        icon={<Stethoscope className="w-4 h-4 text-blue-500" />}
+                                    />
+                                </Field>
+                                <Field label="Hospital / Account" error={errors.account_name}>
+                                    <MasterDataSelect
+                                        value={draft.account_name}
+                                        displayLabel={accountLabel}
+                                        onChange={(val, label) => { set("account_name", val); setAccountLabel(label); }}
+                                        fetchOptions={fetchAccounts}
+                                        onAddNew={() => setShowAddAccount(true)}
+                                        addNewLabel="Add New Account"
+                                        placeholder="Auto-fetched / Search"
+                                        searchPlaceholder="Search account..."
+                                        emptyMessage="No accounts found"
+                                    />
+                                </Field>
+                            </>
+                        )}
+
+                        {draft.guest_type === "Others" && (
+                            <Field label="Guest Name" required error={errors.guest_name}>
+                                <Input
+                                    placeholder="Enter Guest Name"
+                                    value={draft.guest_name}
+                                    onChange={(e) => set("guest_name", e.target.value)}
+                                    className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]"
+                                />
+                            </Field>
+                        )}
+                    </>
                 )}
 
                 {/* Guest only fields */}
-                {hasGuestDetails && (
+                {hasGuestDetails && draft.guest_type && (
                     <>
                         <Field label="Designation" error={errors.designation}>
                             <Input placeholder="Designation" value={draft.designation}
                                 onChange={(e) => set("designation", e.target.value)}
-                                className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
-                        </Field>
-                        <Field label="Firm/Hospital Name" error={errors.firm_or_hospital_name}>
-                            <Input placeholder="Firm/Hospital Name" value={draft.firm_or_hospital_name}
-                                onChange={(e) => set("firm_or_hospital_name", e.target.value)}
                                 className="h-[42px] border-2 border-[#e5e7eb] rounded-[8px]" />
                         </Field>
                         <Field label="Repeat Guest" error={errors.repeat_guest}>
@@ -397,7 +568,7 @@ export function Tab2FoodCatering({
                 )}
 
                 {/* Stay Required (Guest only) */}
-                {hasGuestDetails && (
+                {hasGuestDetails && draft.guest_type && (
                     <div className="flex flex-col gap-2 justify-center">
                         <label className="flex items-center gap-2 cursor-pointer mt-4">
                             <input
@@ -467,9 +638,10 @@ export function Tab2FoodCatering({
                                 <TableRow>
                                     <TableHead className="font-medium text-[#364153]">Booking For</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Day</TableHead>
+                                    <TableHead className="font-medium text-[#364153]">Guest Type</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Guest Name</TableHead>
+                                    <TableHead className="font-medium text-[#364153]">Hospital/Account</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Designation</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Firm/Hospital</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Repeat Guest</TableHead>
                                     <TableHead className="font-medium text-[#364153]">State</TableHead>
                                     <TableHead className="font-medium text-[#364153]">Country</TableHead>
@@ -490,9 +662,10 @@ export function Tab2FoodCatering({
                                     <TableRow key={entry.name || String(index)} className="bg-white">
                                         <TableCell className="text-[#6a7282] font-medium">{entry.booking_for || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.day || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.distributor_or_guest_name || "-"}</TableCell>
+                                        <TableCell>{getGuestTypeBadge(entry.guest_type)}</TableCell>
+                                        <TableCell className="text-[#6a7282] font-medium">{getDisplayName(entry)}</TableCell>
+                                        <TableCell className="text-[#6a7282] max-w-[200px] truncate" title={entry.account_name || "-"}>{entry.account_name || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.designation || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.firm_or_hospital_name || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.repeat_guest || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.state || "-"}</TableCell>
                                         <TableCell className="text-[#6a7282]">{entry.country || "-"}</TableCell>
@@ -522,6 +695,23 @@ export function Tab2FoodCatering({
                     </div>
                 )}
             </div>
+
+            {/* ── Add New Dialogs ── */}
+            <AddDistributorDialog
+                open={showAddDistributor}
+                onClose={() => setShowAddDistributor(false)}
+                onCreated={(opt) => { set("distributor_name", opt.value); setDistributorLabel(opt.label); }}
+            />
+            <AddContactDialog
+                open={showAddContact}
+                onClose={() => setShowAddContact(false)}
+                onCreated={(opt) => { set("contact_name", opt.value); setContactLabel(opt.label); }}
+            />
+            <AddAccountDialog
+                open={showAddAccount}
+                onClose={() => setShowAddAccount(false)}
+                onCreated={(opt) => { set("account_name", opt.value); setAccountLabel(opt.label); }}
+            />
         </div>
     );
 }
