@@ -7,18 +7,26 @@ export interface Tab1FormData {
     to_date: string;
 }
 
+// ─── Guest Type ──────────────────────────────────────────────────────────────
+
+export type GuestType = "Distributor" | "Doctor" | "Others" | "";
+
 // ─── Tab 2: Food & Catering ──────────────────────────────────────────────────
 
 export interface FoodCateringEntry {
     name?: string;
     booking_for?: string;
     day?: string;
+    // New fields
+    guest_type?: GuestType;
+    guest_name?: string;
+    distributor_name?: string;
+    account_name?: string;
+    contact_name?: string;
     // Academy fields
     total_no_of_guest?: number;
-    // Club House fields
-    distributor_or_guest_name?: string;
+    // Guest details
     designation?: string;
-    firm_or_hospital_name?: string;
     repeat_guest?: "Yes" | "No";
     state?: string;
     country?: string;
@@ -35,6 +43,9 @@ export interface FoodCateringEntry {
     remark?: string;
     is_food?: number;
     is_stay?: number;
+    // Legacy fields (backward compat)
+    distributor_or_guest_name?: string;
+    firm_or_hospital_name?: string;
 }
 
 export interface Tab2FormData {
@@ -63,11 +74,16 @@ export interface Tab2FormData {
 
 export interface StayEntry {
     name?: string;
-    distributor_or_guest_name?: string;
+    // New fields
+    guest_type?: GuestType;
+    guest_name?: string;
+    distributor_name?: string;
+    account_name?: string;
+    contact_name?: string;
+    // Guest details
     designation?: string;
     check_in_date?: string;
     check_out_date?: string;
-    firm_or_hospital_name?: string;
     repeat_guest?: "Yes" | "No";
     state?: string;
     country?: string;
@@ -75,6 +91,9 @@ export interface StayEntry {
     is_food?: number;
     is_stay?: number;
     booking_for?: string;
+    // Legacy fields (backward compat)
+    distributor_or_guest_name?: string;
+    firm_or_hospital_name?: string;
 }
 
 export interface Tab3FormData {
@@ -103,4 +122,11 @@ export interface BookingState {
 export interface DayOption {
     label: string; // "Day 1 (2026-02-22)"
     value: string; // "2026-02-22"
+}
+
+// ─── Master Data Option ──────────────────────────────────────────────────────
+
+export interface MasterDataOption {
+    value: string;
+    label: string;
 }

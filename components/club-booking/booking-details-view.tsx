@@ -121,8 +121,8 @@ export function BookingDetailsView({ booking }: { booking: any }) {
     };
 
     const getStayType = (item: any) => {
-        const isStay = item.is_stay || item.stay_required;
-        const isFood = item.is_food === 1 || item.booking_for;
+        const isStay = item.is_stay;
+        const isFood = item.is_food;
 
         if (isStay && isFood) return "Stay + Food";
         if (isStay) return "Stay";
@@ -139,6 +139,25 @@ export function BookingDetailsView({ booking }: { booking: any }) {
 
     const foodList = booking?.food_and_catering || [];
     const stayList = booking?.stay || booking?.stay_details || [];
+
+    const getGuestTypeBadge = (guestType: string) => {
+        if (!guestType) return <span className="text-gray-400">—</span>;
+        const colorClass = guestType === "Doctor" ? "bg-blue-50 text-blue-700" :
+                           guestType === "Distributor" ? "bg-purple-50 text-purple-700" :
+                           "bg-gray-100 text-gray-700";
+        return <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${colorClass}`}>{guestType}</span>;
+    };
+
+    const getDisplayName = (entry: any) => {
+        if (entry.guest_type === "Others") return entry.guest_name || "—";
+        if (entry.guest_type === "Distributor") return entry.guest_name || entry.distributor_name || "—";
+        if (entry.guest_type === "Doctor") return entry.guest_name || entry.contact_name || "—";
+        return entry.guest_name || entry.distributor_or_guest_name || "—";
+    };
+
+    const getHospitalAccount = (entry: any) => {
+        return entry.account_name || entry.firm_or_hospital_name || "—";
+    };
 
     const initiateAction = (action: 'Approve' | 'Reject') => {
         setActionToPerform(action);
@@ -163,7 +182,6 @@ export function BookingDetailsView({ booking }: { booking: any }) {
             setIsSubmitting(false);
         }
     };
-    console.log(stayList, "stayList")
     return (
         <div className="w-full p-2 sm:p-4 lg:p-2 space-y-8 animate-in fade-in duration-500 bg-white">
 
@@ -276,9 +294,10 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                 {stayList.length > 0 ? (
                     <>
                         <div className="hidden md:block rounded-xl border border-gray-100 overflow-x-auto shadow-sm thin-scrollbar">
-                            <Table>
+                            <Table className="whitespace-nowrap min-w-[1200px]">
                                 <TableHeader className="bg-gray-50/80">
                                     <TableRow className="hover:bg-transparent border-gray-100 h-10">
+                                        <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Guest Type</TableHead>
                                         <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Guest Name</TableHead>
                                         <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Designation</TableHead>
                                         <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Organization</TableHead>
@@ -293,9 +312,10 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                 <TableBody>
                                     {stayList.map((stay: any, idx: number) => (
                                         <TableRow key={idx} className="hover:bg-slate-50 border-gray-50 transition-colors h-12">
-                                            <TableCell className="font-bold text-[#101828] text-[13px] py-2 px-4">{stay.distributor_or_guest_name || "—"}</TableCell>
+                                            <TableCell className="px-4">{getGuestTypeBadge(stay.guest_type)}</TableCell>
+                                            <TableCell className="font-bold text-[#101828] text-[13px] py-2 px-4">{getDisplayName(stay)}</TableCell>
                                             <TableCell className="text-gray-500 text-[13px] px-4">{stay.designation || "—"}</TableCell>
-                                            <TableCell className="text-gray-500 text-[13px] whitespace-nowrap px-4">{stay.firm_or_hospital_name || "—"}</TableCell>
+                                            <TableCell className="text-gray-500 text-[13px] px-4 max-w-[200px] truncate" title={getHospitalAccount(stay)}>{getHospitalAccount(stay)}</TableCell>
                                             <TableCell className="text-gray-500 text-[13px] px-4">{stay.state ? `${stay.state}, ${stay.country || ""}` : stay.country || "—"}</TableCell>
                                             <TableCell className="font-semibold text-gray-700 text-[12px] px-4">{formatDisplayDate(stay.check_in_date)}</TableCell>
                                             <TableCell className="font-semibold text-gray-700 text-[12px] px-4">{formatDisplayDate(stay.check_out_date)}</TableCell>
@@ -324,7 +344,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                 <div key={idx} className="border border-gray-100 rounded-xl p-4 space-y-3 shadow-sm bg-gray-50/10">
                                     <div className="flex justify-between items-start">
                                         <div className="flex flex-col">
-                                            <span className="font-bold text-[#101828] text-[14px]">{stay.distributor_or_guest_name || "Guest"}</span>
+                                            <span className="font-bold text-[#101828] text-[14px]">{getDisplayName(stay)}</span>
                                             <span className="text-[11px] text-slate-500">{stay.designation || "No Designation"}</span>
                                         </div>
                                         <span className="bg-orange-50 text-orange-600 px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-wider">
@@ -332,7 +352,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
-                                        <KeyValueItem label="Organization" value={stay.firm_or_hospital_name} />
+                                        <KeyValueItem label="Organization" value={getHospitalAccount(stay)} />
                                         <KeyValueItem label="Location" value={stay.country} />
                                         <KeyValueItem label="Check-in" value={formatDisplayDate(stay.check_in_date)} />
                                         <KeyValueItem label="Check-out" value={formatDisplayDate(stay.check_out_date)} />
@@ -354,6 +374,7 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                     <TableRow className="hover:bg-transparent border-gray-100 h-10">
                                         <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Booking For</TableHead>
                                         <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Day</TableHead>
+                                        <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Guest Type</TableHead>
                                         <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Guest Name</TableHead>
                                         <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Total Guests</TableHead>
                                         <TableHead className="text-gray-400 font-bold uppercase text-[10px] tracking-widest whitespace-nowrap px-4">Designation</TableHead>
@@ -377,10 +398,11 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                             <TableCell className="font-bold text-[#101828] text-[13px] py-2 px-4 text-nowrap">
                                                 <span className="">{formatDates(food.day)}</span>
                                             </TableCell>
-                                            <TableCell className="text-gray-600 text-[13px] px-4 font-semibold">{food.distributor_or_guest_name || "—"}</TableCell>
+                                            <TableCell className="px-4">{getGuestTypeBadge(food.guest_type)}</TableCell>
+                                            <TableCell className="text-gray-600 text-[13px] px-4 font-semibold">{getDisplayName(food)}</TableCell>
                                             <TableCell className="font-bold text-green-700 text-[14px] px-4 text-center">{food.total_no_of_guest || 0}</TableCell>
                                             <TableCell className="text-gray-500 text-[13px] px-4 whitespace-nowrap">{food.designation || "—"}</TableCell>
-                                            <TableCell className="text-gray-500 text-[13px] px-4 whitespace-nowrap">{food.firm_or_hospital_name || "—"}</TableCell>
+                                            <TableCell className="text-gray-500 text-[13px] px-4 max-w-[200px] truncate" title={getHospitalAccount(food)}>{getHospitalAccount(food)}</TableCell>
                                             <TableCell className="text-center px-4">
                                                 <span className={cn(
                                                     "text-[10px] font-bold px-1.5 py-0.5 rounded",
@@ -429,9 +451,9 @@ export function BookingDetailsView({ booking }: { booking: any }) {
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3 pt-2 border-t border-gray-100">
-                                        <KeyValueItem label="Guest Name" value={food.distributor_or_guest_name} />
+                                        <KeyValueItem label="Guest Name" value={getDisplayName(food)} />
                                         <KeyValueItem label="Total Guests" value={food.total_no_of_guest} />
-                                        <KeyValueItem label="Firm/Hospital" value={food.firm_or_hospital_name} />
+                                        <KeyValueItem label="Firm/Hospital" value={getHospitalAccount(food)} />
                                         <KeyValueItem label="Food Pref" value={food.food_preferences} />
                                         <div className="col-span-full py-2 bg-white rounded-lg border border-gray-100/50 flex justify-around">
                                             <div className="flex flex-col items-center">

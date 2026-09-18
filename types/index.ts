@@ -55,6 +55,10 @@ export interface State {
     name: string;
 }
 
+export interface City {
+    name: string;
+}
+
 // Shared lookup item shape from Frappe get_all
 export interface LookupItem {
     name: string;
@@ -66,7 +70,11 @@ export interface ClubMasterData {
     food_preferences: LookupItem[];
     meal_type: LookupItem[];
     service_type: LookupItem[];
+    customer_type: LookupItem[];
 }
 
 // Legacy alias kept for backward compat
 export type MasterData = Record<string, any>;
+
+// Re-export MasterDataOption from club-booking types
+export type { MasterDataOption } from "./club-booking.types";

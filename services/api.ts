@@ -1,4 +1,4 @@
-import { Country, State, ClubMasterData } from "@/types";
+import type { ClubMasterData, Country, State, City, MasterDataOption } from "@/types";
 import { API_ROUTES } from "./api-routes";
 import { clientFetch } from "@/lib/client-fetcher";
 
@@ -69,7 +69,7 @@ export const api = {
     async getClubMasterData(): Promise<ClubMasterData | null> {
         try {
             const json = await clientFetch(API_ROUTES.clubMasterData.get);
-            return json.message;
+            return json.message?.data ?? json.message;
         } catch (error) {
             console.error("Error fetching club master data:", error);
             return null;
@@ -99,6 +99,111 @@ export const api = {
         } catch (error) {
             console.error("Error fetching states:", error);
             return [];
+        }
+    },
+
+    async getCities(search_name?: string): Promise<City[]> {
+        try {
+            const json = await clientFetch(API_ROUTES.clubMasterData.getCities, {
+                params: search_name ? { search_name } : undefined,
+            });
+            const result = json.message?.data ?? json.message ?? [];
+            return Array.isArray(result) ? result : [];
+        } catch (error) {
+            console.error("Error fetching cities:", error);
+            return [];
+        }
+    },
+
+    // ─── Master Data (Distributor / Contact / Account) ───────────────────────
+
+    async getDistributorList(search?: string, limit?: number): Promise<{ value: string; label: string }[]> {
+        try {
+            const params: any = {};
+            if (search) params.search = search;
+            if (limit) params.limit = limit;
+            const json = await clientFetch(API_ROUTES.masterData.getDistributorList, { params });
+            return json.message ?? [];
+        } catch (error) {
+            console.error("Error fetching distributor list:", error);
+            return [];
+        }
+    },
+
+    async getAccountList(search?: string, limit?: number): Promise<{ value: string; label: string }[]> {
+        try {
+            const params: any = {};
+            if (search) params.search = search;
+            if (limit) params.limit = limit;
+            const json = await clientFetch(API_ROUTES.masterData.getAccountList, { params });
+            return json.message ?? [];
+        } catch (error) {
+            console.error("Error fetching account list:", error);
+            return [];
+        }
+    },
+
+    async getContactList(search?: string, limit?: number): Promise<{ value: string; label: string }[]> {
+        try {
+            const params: any = {};
+            if (search) params.search = search;
+            if (limit) params.limit = limit;
+            const json = await clientFetch(API_ROUTES.masterData.getContactList, { params });
+            return json.message ?? [];
+        } catch (error) {
+            console.error("Error fetching contact list:", error);
+            return [];
+        }
+    },
+
+    async getAccountsByContact(contact: string): Promise<{ value: string; label: string }[]> {
+        try {
+            const json = await clientFetch(API_ROUTES.masterData.getAccountsByContact, {
+                params: { contact },
+            });
+            return json.message ?? [];
+        } catch (error) {
+            console.error("Error fetching accounts by contact:", error);
+            return [];
+        }
+    },
+
+    async saveAccount(data: Record<string, any>): Promise<{ value: string; label: string } | null> {
+        try {
+            const json = await clientFetch(API_ROUTES.masterData.saveAccount, {
+                method: "POST",
+                body: data,
+            });
+            return json.message ?? null;
+        } catch (error) {
+            console.error("Error saving account:", error);
+            throw error;
+        }
+    },
+
+    async saveContact(data: Record<string, any>): Promise<{ value: string; label: string } | null> {
+        try {
+            const json = await clientFetch(API_ROUTES.masterData.saveContact, {
+                method: "POST",
+                body: data,
+            });
+            return json.message ?? null;
+        } catch (error) {
+            console.error("Error saving contact:", error);
+            throw error;
+        }
+    },
+
+    async saveDistributor(data: Record<string, any>): Promise<{ value: string; label: string } | null> {
+        try {
+            const json = await clientFetch(API_ROUTES.masterData.saveDistributor, {
+                method: "POST",
+                body: data,
+            });
+            return json.message ?? null;
+        } catch (error) {
+            console.error("Error saving distributor:", error);
+            throw error;
         }
     },
 

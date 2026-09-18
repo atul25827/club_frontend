@@ -1,4 +1,4 @@
-import type { Tab1FormData, FoodCateringEntry, StayEntry } from "@/types/club-booking.types";
+import type { Tab1FormData } from "@/types/club-booking.types";
 
 // ─── Tab 1 Validation ────────────────────────────────────────────────────────
 
@@ -31,9 +31,12 @@ export interface Tab2Draft {
     booking_for: string;
     day: string;
     total_no_of_guest: string;
-    distributor_or_guest_name: string;
+    guest_type: string;
+    guest_name: string;
+    distributor_name: string;
+    account_name: string;
+    contact_name: string;
     designation: string;
-    firm_or_hospital_name: string;
     repeat_guest: string;
     state: string;
     country: string;
@@ -66,8 +69,21 @@ export function validateTab2Draft(data: Tab2Draft): ValidationError[] {
         errors.push({ field: "meal_type", message: "Meal type is required" });
 
     if (hasGuestDetails) {
-        if (!data.distributor_or_guest_name?.trim())
-            errors.push({ field: "distributor_or_guest_name", message: "Guest name is required" });
+        // Guest type is required for Club/Club House/Guest
+        if (!data.guest_type)
+            errors.push({ field: "guest_type", message: "Guest type is required" });
+
+        // Conditional validation based on guest type
+        if (data.guest_type === "Distributor") {
+            if (!data.distributor_name?.trim())
+                errors.push({ field: "distributor_name", message: "Distributor is required" });
+        } else if (data.guest_type === "Doctor") {
+            if (!data.contact_name?.trim())
+                errors.push({ field: "contact_name", message: "Doctor/Contact is required" });
+        } else if (data.guest_type === "Others") {
+            if (!data.guest_name?.trim())
+                errors.push({ field: "guest_name", message: "Guest name is required" });
+        }
     } else {
         if (!data.total_no_of_guest || Number(data.total_no_of_guest) <= 0)
             errors.push({ field: "total_no_of_guest", message: "Total guests must be a positive number" });
@@ -105,11 +121,14 @@ export function validateTab2Draft(data: Tab2Draft): ValidationError[] {
 // ─── Tab 3 Validation ────────────────────────────────────────────────────────
 
 export interface Tab3Draft {
-    distributor_or_guest_name: string;
+    guest_type: string;
+    guest_name: string;
+    distributor_name: string;
+    account_name: string;
+    contact_name: string;
     designation: string;
     check_in_date: string;
     check_out_date: string;
-    firm_or_hospital_name: string;
     repeat_guest: string;
     state: string;
     country: string;
@@ -119,8 +138,20 @@ export interface Tab3Draft {
 export function validateTab3Draft(data: Tab3Draft): ValidationError[] {
     const errors: ValidationError[] = [];
 
-    if (!data.distributor_or_guest_name?.trim())
-        errors.push({ field: "distributor_or_guest_name", message: "Guest name is required" });
+    if (!data.guest_type)
+        errors.push({ field: "guest_type", message: "Guest type is required" });
+
+    // Conditional validation based on guest type
+    if (data.guest_type === "Distributor") {
+        if (!data.distributor_name?.trim())
+            errors.push({ field: "distributor_name", message: "Distributor is required" });
+    } else if (data.guest_type === "Doctor") {
+        if (!data.contact_name?.trim())
+            errors.push({ field: "contact_name", message: "Doctor/Contact is required" });
+    } else if (data.guest_type === "Others") {
+        if (!data.guest_name?.trim())
+            errors.push({ field: "guest_name", message: "Guest name is required" });
+    }
 
     if (!data.check_in_date)
         errors.push({ field: "check_in_date", message: "Check-in date is required" });
