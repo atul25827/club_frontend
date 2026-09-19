@@ -57,6 +57,7 @@ export interface State {
 
 export interface City {
     name: string;
+    state?: string;
 }
 
 // Shared lookup item shape from Frappe get_all

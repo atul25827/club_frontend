@@ -124,7 +124,7 @@ function InlineAccountSelect({ value, onChange }: {
 function AddAccountDialog({ open, onClose, onCreated }: {
     open: boolean; onClose: () => void; onCreated: (opt: MasterDataOption) => void;
 }) {
-    const [form, setForm] = useState({ account_name: "", address: "", account_code: "", district: "", customer_type: "", city: "" });
+    const [form, setForm] = useState({ account_name: "", address: "", account_code: "", district: "", customer_type: "", city: "", state: "" });
     const [saving, setSaving] = useState(false);
 
     const [cities, setCities] = useState<City[]>([]);
@@ -158,7 +158,7 @@ function AddAccountDialog({ open, onClose, onCreated }: {
                 toast.success("Account created successfully");
                 onCreated(result);
                 onClose();
-                setForm({ account_name: "", address: "", account_code: "", district: "", customer_type: "", city: "" });
+                setForm({ account_name: "", address: "", account_code: "", district: "", customer_type: "", city: "", state: "" });
             }
         } catch (err: any) {
             toast.error(err?.message ?? "Failed to create account");
@@ -182,9 +182,9 @@ function AddAccountDialog({ open, onClose, onCreated }: {
                         <FormField label="Account Code">
                             <Input value={form.account_code} onChange={e => set("account_code", e.target.value)} placeholder="Code" className={inputClass} />
                         </FormField>
-                        <FormField label="District">
+                        {/* <FormField label="District">
                             <Input value={form.district} onChange={e => set("district", e.target.value)} placeholder="District" className={inputClass} />
-                        </FormField>
+                        </FormField> */}
                         <FormField label="Customer Type">
                             <Select value={form.customer_type} onValueChange={v => set("customer_type", v)}>
                                 <SelectTrigger className={inputClass}>
@@ -198,17 +198,24 @@ function AddAccountDialog({ open, onClose, onCreated }: {
                             </Select>
                         </FormField>
                         <FormField label="City">
-                            <SearchableSelect 
-                                options={cities} 
-                                value={form.city} 
-                                onChange={v => set("city", v)}
+                            <SearchableSelect
+                                options={cities}
+                                value={form.city}
+                                onChange={v => {
+                                    set("city", v);
+                                    const selectedCity = cities.find(c => c.name === v);
+                                    set("state", selectedCity?.state || "");
+                                }}
                                 onSearch={handleCitySearch}
-                                placeholder="Select City" 
+                                placeholder="Select City"
                                 searchPlaceholder="Search city..."
                                 emptyMessage="No cities found"
                                 loadingMessage="Loading cities..."
                                 isLoading={isLoadingCities}
                             />
+                        </FormField>
+                        <FormField label="State">
+                            <Input value={form.state} disabled placeholder="State" className={inputClass} />
                         </FormField>
                         <div className="col-span-2">
                             <FormField label="Address" required>
@@ -296,7 +303,7 @@ export function AddContactDialog({ open, onClose, onCreated }: {
 export function AddDistributorDialog({ open, onClose, onCreated }: {
     open: boolean; onClose: () => void; onCreated: (opt: MasterDataOption) => void;
 }) {
-    const [form, setForm] = useState({ distributor_name: "", distributor_code: "", email: "", billing_address: "", city: "" });
+    const [form, setForm] = useState({ distributor_name: "", distributor_code: "", email: "", billing_address: "", city: "", state: "" });
     const [saving, setSaving] = useState(false);
 
     const [cities, setCities] = useState<City[]>([]);
@@ -325,7 +332,7 @@ export function AddDistributorDialog({ open, onClose, onCreated }: {
                 toast.success("Distributor created successfully");
                 onCreated(result);
                 onClose();
-                setForm({ distributor_name: "", distributor_code: "", email: "", billing_address: "", city: "" });
+                setForm({ distributor_name: "", distributor_code: "", email: "", billing_address: "", city: "", state: "" });
             }
         } catch (err: any) {
             toast.error(err?.message ?? "Failed to create distributor");
@@ -353,17 +360,24 @@ export function AddDistributorDialog({ open, onClose, onCreated }: {
                             <Input type="email" value={form.email} onChange={e => set("email", e.target.value)} placeholder="email@example.com" className={inputClass} />
                         </FormField>
                         <FormField label="City">
-                            <SearchableSelect 
-                                options={cities} 
-                                value={form.city} 
-                                onChange={v => set("city", v)}
+                            <SearchableSelect
+                                options={cities}
+                                value={form.city}
+                                onChange={v => {
+                                    set("city", v);
+                                    const selectedCity = cities.find(c => c.name === v);
+                                    set("state", selectedCity?.state || "");
+                                }}
                                 onSearch={handleCitySearch}
-                                placeholder="Select City" 
+                                placeholder="Select City"
                                 searchPlaceholder="Search city..."
                                 emptyMessage="No cities found"
                                 loadingMessage="Loading cities..."
                                 isLoading={isLoadingCities}
                             />
+                        </FormField>
+                        <FormField label="State">
+                            <Input value={form.state} disabled placeholder="State" className={inputClass} />
                         </FormField>
                         <div className="col-span-2">
                             <FormField label="Billing Address">
