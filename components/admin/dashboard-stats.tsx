@@ -27,9 +27,8 @@ export function DashboardStats({ stats, cards, viewAllHref }: DashboardStatsProp
 
     return (
         <div className={cn(
-            "grid gap-6 mb-8",
-            "grid-cols-1 sm:grid-cols-2",
-            cards.length <= 5 ? "lg:grid-cols-4" : "lg:grid-cols-3 xl:grid-cols-6"
+            "grid gap-4 mb-8",
+            "grid-cols-2 lg:grid-cols-4"
         )}>
             {cards.map((card, index) => {
                 const value = stats[card.key] ?? 0;
@@ -38,18 +37,26 @@ export function DashboardStats({ stats, cards, viewAllHref }: DashboardStatsProp
                         key={index}
                         onClick={() => handleCardClick(card.filterValue)}
                         className={cn(
-                            "rounded-[16px] p-4 flex items-center gap-5 shadow-sm transition-transform hover:scale-[1.02] cursor-pointer",
-                            card.bgClass
+                            "bg-white border border-gray-100 rounded-xl p-5 flex flex-col gap-3 shadow-sm transition-transform hover:shadow-md hover:border-gray-200 hover:-translate-y-0.5 cursor-pointer"
                         )}
                     >
-                        <card.icon className={cn("w-8 h-8", card.iconClass)} strokeWidth={1.5} />
-                        <div className="flex flex-col">
-                            <span className={cn("text-2xl font-bold tracking-tight", card.textClass)}>
-                                {value}
-                            </span>
-                            <span className={cn("text-base font-medium opacity-90", card.textClass)}>
+                        <div className="flex items-center justify-between">
+                            <span className="text-sm font-semibold text-[#475467]">
                                 {card.label}
                             </span>
+                            <div className={cn("w-8 h-8 rounded-lg flex items-center justify-center", card.bgClass)}>
+                                <card.icon className={cn("w-4 h-4", card.iconClass)} strokeWidth={2} />
+                            </div>
+                        </div>
+                        <div className="flex items-baseline gap-2 mt-2">
+                            <span className="text-3xl font-bold text-[#101828] tracking-tight">
+                                {value}
+                            </span>
+                            {/* {card.subText && (
+                                <span className={cn("text-xs font-medium", card.subTextClass)}>
+                                    {card.subText}
+                                </span>
+                            )} */}
                         </div>
                     </div>
                 );

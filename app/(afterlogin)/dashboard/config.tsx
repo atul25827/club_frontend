@@ -26,6 +26,8 @@ export interface DashboardStatsCardConfig {
     textClass: string;
     iconClass: string;
     filterValue?: string;
+    subText?: string;
+    subTextClass?: string;
 }
 
 export interface DashboardDefinition {
@@ -50,12 +52,12 @@ export const DASHBOARD_REGISTRY: DashboardDefinition[] = [
         getList: (page, limit) => api.getApproverClubBookingList(page, limit),
         viewAllHref: "/club-booking-list",
         statsCards: [
-            { label: "Total Events", key: "total_bookings", icon: Calendar, bgClass: "bg-[#E3E8FF]", textClass: "text-[#33398A]", iconClass: "text-[#33398A]", filterValue: "all" },
-            // { label: "Total Submitted", key: "total_submitted", icon: Clock, bgClass: "bg-[#E0F2FE]", textClass: "text-[#0369A1]", iconClass: "text-[#0369A1]", filterValue: "Submitted" },
-            { label: "Total Pending", key: "total_pending", icon: Clock, bgClass: "bg-[#FEF0C7]", textClass: "text-[#B54708]", iconClass: "text-[#B54708]", filterValue: "Awaiting" },
-            { label: "Total Approved", key: "total_approved", icon: CalendarCheck, bgClass: "bg-[#D1FADF]", textClass: "text-[#027A48]", iconClass: "text-[#027A48]", filterValue: "Approved" },
-            { label: "Total Rejected", key: "total_rejected", icon: XSquare, bgClass: "bg-red-100", textClass: "text-red-600", iconClass: "text-red-600", filterValue: "Rejected" },
-            // { label: "Total Cancelled", key: "total_cancelled", icon: Ban, bgClass: "bg-orange-100", textClass: "text-orange-600", iconClass: "text-orange-600", filterValue: "Cancelled" },
+            { label: "Total Events", key: "total_bookings", icon: Calendar, bgClass: "bg-[#F3F4F6] text-[#5C5CFF]", textClass: "text-gray-900", iconClass: "text-[#5C5CFF]", filterValue: "all", subText: "All time", subTextClass: "text-[#5C5CFF]" },
+            // { label: "Total Submitted", key: "total_submitted", icon: Clock, bgClass: "bg-[#EFF6FF] text-[#3B82F6]", textClass: "text-gray-900", iconClass: "text-[#3B82F6]", filterValue: "Submitted", subText: "Awaiting review", subTextClass: "text-[#3B82F6]" },
+            { label: "Total Pending", key: "total_pending", icon: Clock, bgClass: "bg-[#EFF6FF] text-[#3B82F6]", textClass: "text-gray-900", iconClass: "text-[#3B82F6]", filterValue: "Awaiting", subText: "Awaiting review", subTextClass: "text-[#3B82F6]" },
+            { label: "Total Approved", key: "total_approved", icon: CalendarCheck, bgClass: "bg-[#ECFDF5] text-[#10B981]", textClass: "text-gray-900", iconClass: "text-[#10B981]", filterValue: "Approved", subText: "Confirmed", subTextClass: "text-[#10B981]" },
+            { label: "Total Rejected", key: "total_rejected", icon: XSquare, bgClass: "bg-[#FEF2F2] text-[#EF4444]", textClass: "text-gray-900", iconClass: "text-[#EF4444]", filterValue: "Rejected", subText: "Not approved", subTextClass: "text-[#EF4444]" },
+            // { label: "Total Cancelled", key: "total_cancelled", icon: Ban, bgClass: "bg-[#FFF7ED] text-[#F97316]", textClass: "text-gray-900", iconClass: "text-[#F97316]", filterValue: "Cancelled", subText: "Cancelled", subTextClass: "text-[#F97316]" },
         ],
         columns: [
             {
@@ -86,12 +88,12 @@ export const DASHBOARD_REGISTRY: DashboardDefinition[] = [
         getList: (page, limit) => api.getClubBookingList(page, limit),
         viewAllHref: "/club-booking-list",
         statsCards: [
-            { label: "Total Events", key: "total_bookings", icon: Calendar, bgClass: "bg-[#E3E8FF]", textClass: "text-[#33398A]", iconClass: "text-[#33398A]", filterValue: "all" },
-            { label: "Total Submitted", key: "total_submitted", icon: Clock, bgClass: "bg-[#E0F2FE]", textClass: "text-[#0369A1]", iconClass: "text-[#0369A1]", filterValue: "Submitted" },
-            // { label: "Total Pending", key: "total_pending", icon: Clock, bgClass: "bg-[#FEF0C7]", textClass: "text-[#B54708]", iconClass: "text-[#B54708]", filterValue: "Awaiting" },
-            { label: "Total Approved", key: "total_approved", icon: CalendarCheck, bgClass: "bg-[#D1FADF]", textClass: "text-[#027A48]", iconClass: "text-[#027A48]", filterValue: "Approved" },
-            { label: "Total Rejected", key: "total_rejected", icon: XSquare, bgClass: "bg-red-100", textClass: "text-red-600", iconClass: "text-red-600", filterValue: "Rejected" },
-            // { label: "Total Cancelled", key: "total_cancelled", icon: Ban, bgClass: "bg-orange-100", textClass: "text-orange-600", iconClass: "text-orange-600", filterValue: "Cancelled" },
+            { label: "Total Events", key: "total_bookings", icon: Calendar, bgClass: "bg-[#F3F4F6] text-[#5C5CFF]", textClass: "text-gray-900", iconClass: "text-[#5C5CFF]", filterValue: "all", subText: "All time", subTextClass: "text-[#5C5CFF]" },
+            { label: "Total Submitted", key: "total_submitted", icon: Clock, bgClass: "bg-[#EFF6FF] text-[#3B82F6]", textClass: "text-gray-900", iconClass: "text-[#3B82F6]", filterValue: "Submitted", subText: "Awaiting review", subTextClass: "text-[#3B82F6]" },
+            // { label: "Total Pending", key: "total_pending", icon: Clock, bgClass: "bg-[#FEF0C7]", textClass: "text-[#B54708]", iconClass: "text-[#B54708]", filterValue: "Awaiting", subText: "Awaiting review", subTextClass: "text-[#B54708]" },
+            { label: "Total Approved", key: "total_approved", icon: CalendarCheck, bgClass: "bg-[#ECFDF5] text-[#10B981]", textClass: "text-gray-900", iconClass: "text-[#10B981]", filterValue: "Approved", subText: "Confirmed", subTextClass: "text-[#10B981]" },
+            { label: "Total Rejected", key: "total_rejected", icon: XSquare, bgClass: "bg-[#FEF2F2] text-[#EF4444]", textClass: "text-gray-900", iconClass: "text-[#EF4444]", filterValue: "Rejected", subText: "Not approved", subTextClass: "text-[#EF4444]" },
+            // { label: "Total Cancelled", key: "total_cancelled", icon: Ban, bgClass: "bg-[#FFF7ED] text-[#F97316]", textClass: "text-gray-900", iconClass: "text-[#F97316]", filterValue: "Cancelled", subText: "Cancelled", subTextClass: "text-[#F97316]" },
         ],
         columns: [
             {

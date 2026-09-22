@@ -16,6 +16,7 @@ import { generateDayOptions, toFrappeDatetime } from "@/lib/date-utils";
 import { validateTab2Draft, toErrorMap, type Tab2Draft } from "@/lib/booking-validation";
 import type { FoodCateringEntry, DayOption } from "@/types/club-booking.types";
 import type { ClubMasterData, Country, State, MasterDataOption } from "@/types";
+import { cn } from "@/lib/utils";
 
 // ─── Reusable Field wrapper ───────────────────────────────────────────────────
 
@@ -81,6 +82,7 @@ function csvToArray(csv: string): string[] {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
+import { DayWiseListView } from "./shared-list-views";
 
 export function Tab2FoodCatering({
     fromDate, toDate, masterData, entries, onAdd, onRemove, isSubmitting,
@@ -627,73 +629,11 @@ export function Tab2FoodCatering({
                     <span className="ml-auto text-[13px] text-[#6a7282]">{entries.length} entries</span>
                 </div>
 
-                {entries.length === 0 ? (
-                    <div className="border border-dashed border-[#e5e7eb] rounded-[16px] py-10 text-center text-[#adadad] text-[14px]">
-                        No entries yet. Fill the form above and click <b>+</b> to add.
-                    </div>
-                ) : (
-                    <div className="border border-[#e5e7eb] rounded-[16px] overflow-x-auto shadow-sm">
-                        <Table className="whitespace-nowrap min-w-[1400px]">
-                            <TableHeader className="bg-[#f8f9fa]">
-                                <TableRow>
-                                    <TableHead className="font-medium text-[#364153]">Booking For</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Day</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Guest Type</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Guest Name</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Hospital/Account</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Designation</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Repeat Guest</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">State</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Country</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Food Pref.</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Meal Type</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Total Guests</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Veg</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Non-Veg</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Jain</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Other</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Food & Stay</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Remark</TableHead>
-                                    <TableHead className="font-medium text-[#364153] sticky right-0 bg-[#f8f9fa]">Action</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {entries.map((entry, index) => (
-                                    <TableRow key={entry.name || String(index)} className="bg-white">
-                                        <TableCell className="text-[#6a7282] font-medium">{entry.booking_for || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.day || "-"}</TableCell>
-                                        <TableCell>{getGuestTypeBadge(entry.guest_type)}</TableCell>
-                                        <TableCell className="text-[#6a7282] font-medium">{getDisplayName(entry)}</TableCell>
-                                        <TableCell className="text-[#6a7282] max-w-[200px] truncate" title={entry.account_name || "-"}>{entry.account_name || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.designation || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.repeat_guest || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.state || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.country || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.food_preferences || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.meal_type || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.total_no_of_guest || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.veg || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.non_veg || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.jain || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.other || "-"}</TableCell>
-                                        <TableCell>{getTypeBadge(entry)}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.remark || "-"}</TableCell>
-                                        <TableCell className="sticky right-0 bg-white">
-                                            <button
-                                                type="button"
-                                                onClick={() => entry.name && onRemove(entry.name)}
-                                                className="cursor-pointer text-red-500 hover:text-red-500 transition-colors"
-                                                title="Remove entry"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                )}
+                <DayWiseListView
+                    entries={entries}
+                    onRemove={onRemove}
+                    showDelete={true}
+                />
             </div>
 
             {/* ── Add New Dialogs ── */}

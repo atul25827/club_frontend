@@ -82,9 +82,9 @@ export function BookingAuditTrail({ bookingId, auditLogs, open: controlledOpen, 
             )}
             {!trigger && !isControlled && (
                 <SheetTrigger asChild>
-                    <Button variant="outline" className="gap-2">
+                    <Button variant="outline" className="gap-2 px-3 md:px-4">
                         <CalendarClock className="h-4 w-4" />
-                        Audit Trail
+                        <span className="hidden md:inline">Audit Trail</span>
                     </Button>
                 </SheetTrigger>
             )}

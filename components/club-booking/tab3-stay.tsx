@@ -10,6 +10,8 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { MasterDataSelect } from "./master-data-select";
 import { AddDistributorDialog, AddContactDialog, AddAccountDialog } from "./add-entity-dialog";
 import { Plus, BedDouble, Trash2, Loader2, Building2, Stethoscope, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { StayListView } from "./shared-list-views";
 import { api } from "@/services/api";
 import { formatDisplayDate, toFrappeDatetime } from "@/lib/date-utils";
 import { validateTab3Draft, toErrorMap, type Tab3Draft } from "@/lib/booking-validation";
@@ -376,57 +378,11 @@ export function Tab3Stay({ entries, onAdd, onRemove, isSubmitting }: Tab3Props) 
                     <span className="ml-auto text-[13px] text-[#6a7282]">{entries.length} entries</span>
                 </div>
 
-                {entries.length === 0 ? (
-                    <div className="border border-dashed border-[#e5e7eb] rounded-[16px] py-10 text-center text-[#adadad] text-[14px]">
-                        No stay entries yet. Fill the form above and click <b>+</b> to add.
-                    </div>
-                ) : (
-                    <div className="border border-[#e5e7eb] rounded-[16px] overflow-hidden shadow-sm overflow-x-auto">
-                        <Table className="whitespace-nowrap min-w-[1200px]">
-                            <TableHeader className="bg-[#f8f9fa]">
-                                <TableRow>
-                                    <TableHead className="font-medium text-[#364153]">Guest Type</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Guest Name</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Hospital/Account</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Designation</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Check-in</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Check-out</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Repeat</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Country</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">State</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Remark</TableHead>
-                                    <TableHead className="font-medium text-[#364153]">Action</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {entries.map((entry, idx) => (
-                                    <TableRow key={entry.name || String(idx)} className="bg-white">
-                                        <TableCell>{getGuestTypeBadge(entry.guest_type)}</TableCell>
-                                        <TableCell className="text-[#6a7282] font-medium">{getDisplayName(entry)}</TableCell>
-                                        <TableCell className="text-[#6a7282] max-w-[200px] truncate" title={getHospitalAccount(entry)}>{getHospitalAccount(entry)}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.designation || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.check_in_date ? formatDisplayDate(entry.check_in_date) : "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.check_out_date ? formatDisplayDate(entry.check_out_date) : "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.repeat_guest || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.country || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.state || "-"}</TableCell>
-                                        <TableCell className="text-[#6a7282]">{entry.remark || "-"}</TableCell>
-                                        <TableCell>
-                                            <button
-                                                type="button"
-                                                onClick={() => entry.name && onRemove(entry.name)}
-                                                className="cursor-pointer text-red-500 hover:text-red-50 transition-colors"
-                                                title="Remove entry"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                            </button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </div>
-                )}
+                <StayListView
+                    entries={entries}
+                    onRemove={onRemove}
+                    showDelete={true}
+                />
             </div>
 
             {/* ── Add New Dialogs ── */}
