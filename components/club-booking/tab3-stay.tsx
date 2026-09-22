@@ -10,7 +10,6 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { MasterDataSelect } from "./master-data-select";
 import { AddDistributorDialog, AddContactDialog, AddAccountDialog } from "./add-entity-dialog";
 import { Plus, BedDouble, Trash2, Loader2, Building2, Stethoscope, User } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
 import { StayListView } from "./shared-list-views";
 import { api } from "@/services/api";
 import { formatDisplayDate, toFrappeDatetime } from "@/lib/date-utils";
