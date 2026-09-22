@@ -21,7 +21,7 @@ interface Contact {
     display_order: number;
 }
 
-export function NeedHelpModal() {
+export function NeedHelpModal({ isMobile = false }: { isMobile?: boolean }) {
     const [contacts, setContacts] = useState<Contact[]>([]);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
@@ -55,14 +55,24 @@ export function NeedHelpModal() {
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
-                <button
-                    className="flex flex-col items-center justify-center p-3 rounded-[12px] w-[70px] h-[70px] text-[#5A5A5A] hover:bg-white/50 transition-all duration-200 mt-auto group cursor-pointer"
-                >
-                    <HelpCircle className="h-6 w-6 mb-1 text-[#5A5A5A] group-hover:text-[#33398A]" />
-                    <span className="text-[10px] font-medium text-center leading-tight group-hover:text-[#33398A]">Need Help</span>
-                </button>
+                {isMobile ? (
+                    <button
+                        className="flex items-center gap-4 px-4 py-3.5 rounded-xl transition-all duration-200 group w-full text-[#475467] hover:bg-slate-100 font-medium cursor-pointer border border-transparent"
+                    >
+                        <HelpCircle className="h-5 w-5 text-[#94A3B8] group-hover:text-[#33398A]" />
+                        <span className="text-[15px] group-hover:text-[#33398A]">Need Help</span>
+                    </button>
+                ) : (
+                    <button
+                        className="flex flex-col items-center justify-center p-3 rounded-[12px] w-[70px] h-[70px] text-[#5A5A5A] hover:bg-white/50 transition-all duration-200 mt-auto group cursor-pointer"
+                    >
+                        <HelpCircle className="h-6 w-6 mb-1 text-[#5A5A5A] group-hover:text-[#33398A]" />
+                        <span className="text-[10px] font-medium text-center leading-tight group-hover:text-[#33398A]">Need Help</span>
+                    </button>
+                )}
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[780px] p-5 gap-5 rounded-[12px] bg-white shadow-[0_18px_48px_-8px_rgba(15,23,42,0.18)] border-none">
+            <DialogContent className="sm:max-w-[780px] p-5 gap-5 rounded-[12px] bg-white shadow-[0_18px_48px_-8px_rgba(15,23,42,0.18)] border-none max-sm:w-full max-sm:bottom-0 max-sm:translate-y-0 max-sm:top-auto max-sm:rounded-b-none max-sm:rounded-t-[24px]">
+                <div className="mx-auto w-12 h-1 bg-gray-200 rounded-full sm:hidden absolute top-3 left-1/2 -translate-x-1/2" />
                 <DialogHeader className="flex flex-col items-start justify-between space-y-1.5 pb-0">
                     <DialogTitle className="text-[#0F172A] font-semibold text-lg">Need help?</DialogTitle>
                     <DialogDescription className="text-[#94A3B8] text-[13px]">
@@ -98,7 +108,7 @@ export function NeedHelpModal() {
                                                     <span className="text-[#94A3B8] text-xs">
                                                         {contact.label || contact.contact_type}
                                                     </span>
-                                                    <span className="text-[#0F172A] text-sm font-medium whitespace-nowrap">
+                                                    <span className="text-[#0F172A] text-[12px] sm:text-[12px] md:text-sm font-medium whitespace-nowrap">
                                                         {contact.contact_value}
                                                     </span>
                                                 </div>

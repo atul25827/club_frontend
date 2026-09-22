@@ -69,10 +69,10 @@ export default function ChangePasswordPage() {
                 setErrors({ submit: response.error });
             } else {
                 const resMessage = response.data?.message;
-                const successText = typeof resMessage === 'object' && resMessage !== null 
-                    ? resMessage.message 
+                const successText = typeof resMessage === 'object' && resMessage !== null
+                    ? resMessage.message
                     : (resMessage || "Password updated successfully.");
-                
+
                 toast.success(successText);
 
                 if (logoutAllSessions) {
@@ -89,10 +89,15 @@ export default function ChangePasswordPage() {
     };
 
     return (
-        <div className="p-8 max-w-5xl mx-auto w-full h-full">
-            {/* <h1 className="text-2xl font-semibold text-[#271E4A] mb-8">Change Password</h1> */}
+        <div className="p-4 sm:p-8 max-w-5xl mx-auto w-full h-full max-sm:bg-white max-sm:rounded-t-[24px] max-sm:shadow-lg max-sm:relative max-sm:-mt-4">
+            <div className="mx-auto w-12 h-1 bg-gray-200 rounded-full sm:hidden absolute top-3 left-1/2 -translate-x-1/2" />
+            {/* <div className="sm:hidden mt-6 mb-4">
+                <h2 className="text-xl font-bold text-[#0F172A]">Changes Password</h2>
+                <p className="text-sm text-[#94A3B8]">Contact the club admin team for assistance.</p>
+                <div className="w-full h-px bg-[#E2E8F0] my-4" />
+            </div> */}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 sm:gap-y-6">
                 {/* Row 1 */}
                 <div className="space-y-2">
                     <Label htmlFor="username" className="text-sm font-medium text-gray-700">Username</Label>
@@ -187,18 +192,18 @@ export default function ChangePasswordPage() {
 
 
             {/* Buttons */}
-            <div className="mt-12 flex justify-end gap-4">
+            <div className="mt-8 sm:mt-12 flex justify-end gap-4 max-sm:flex-row">
                 <Button
                     variant="outline"
                     onClick={() => router.back()}
-                    className="w-[100px] border-gray-300"
+                    className="flex-1 sm:w-[100px] border-gray-300 h-12 rounded-xl"
                 >
                     Back
                 </Button>
                 <Button
                     onClick={handleSave}
                     disabled={isLoading}
-                    className="w-[100px] bg-[#4B39EF] hover:bg-[#3b2bce] text-white"
+                    className="flex-1 sm:w-[100px] bg-[#111827] hover:bg-black text-white h-12 rounded-xl"
                 >
                     {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save"}
                 </Button>

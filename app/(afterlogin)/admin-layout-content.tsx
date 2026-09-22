@@ -27,7 +27,7 @@ export function AdminLayoutContent({
     return (
         <div className="flex h-screen overflow-hidden bg-[#F7F9FB]">
             <AdminSidebar />
-            <div className="flex-1 flex flex-col ml-[100px] min-w-0 h-full">
+            <div className="flex-1 flex flex-col min-w-0 h-full">
                 <AdminHeader title={title} />
                 <main className="flex-1 p-4 bg-white overflow-y-auto overflow-x-hidden">
                     {children}

@@ -26,9 +26,9 @@ import type { Tab1FormData, FoodCateringEntry, StayEntry } from "@/types/club-bo
 // ─── Tab config ───────────────────────────────────────────────────────────────
 
 const TABS = [
-    { id: 1, label: "Event Information", icon: FileText, activeClass: "bg-[#f3e8ff] text-[#7D3FD0]", indicatorClass: "bg-[#7D3FD0]" },
-    { id: 2, label: "Food & Catering", icon: Utensils, activeClass: "bg-[#dcfce7] text-green-600", indicatorClass: "bg-green-500" },
-    { id: 3, label: "Stay", icon: BedDouble, activeClass: "bg-[#ffedd4] text-orange-500", indicatorClass: "bg-orange-400" },
+    { id: 1, label: "Event Information", icon: FileText },
+    { id: 2, label: "Food & Catering", icon: Utensils },
+    { id: 3, label: "Stay", icon: BedDouble },
 ] as const;
 
 // ─── Main form ────────────────────────────────────────────────────────────────
@@ -268,8 +268,8 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
     return (
         <div className="flex flex-col gap-8 w-full p-2">
             {/* ── Tab Navigation ── */}
-            <div className="flex items-center gap-8 border-b border-[#d9d9d9] pb-4 relative">
-                {TABS.map(({ id, label, icon: Icon, activeClass, indicatorClass }) => {
+            <div className="flex items-center gap-6 sm:gap-8 border-b border-[#E2E8F0] pb-0 relative overflow-x-auto no-scrollbar whitespace-nowrap px-1">
+                {TABS.map(({ id, label, icon: Icon }) => {
                     const isDisabled = id > 1 && !bookingId;
                     return (
                         <button
@@ -277,20 +277,15 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
                             disabled={isDisabled}
                             onClick={() => goToTab(id)}
                             className={cn(
-                                "flex items-center gap-4 relative pb-4 -mb-4 transition-all",
-                                activeTab === id ? "text-[#101828]" : "text-[#6a7282]",
+                                "flex items-center gap-2 relative pb-3 transition-all",
+                                activeTab === id ? "text-[#33398A]" : "text-[#94A3B8]",
                                 isDisabled ? "opacity-40 cursor-not-allowed grayscale" : "cursor-pointer"
                             )}
                         >
-                            <div className={cn(
-                                "p-2 rounded-[10px] w-9 h-6 flex items-center justify-center transition-colors",
-                                activeTab === id ? activeClass : "bg-gray-100 text-gray-500"
-                            )}>
-                                <Icon className="w-4 h-4" />
-                            </div>
-                            <span className="font-medium text-[20px]">{label}</span>
+                            <Icon className={cn("w-[18px] h-[18px]", activeTab === id ? "text-[#33398A]" : "text-[#94A3B8]")} />
+                            <span className={cn("text-[14px] sm:text-[15px]", activeTab === id ? "font-bold" : "font-medium")}>{label}</span>
                             {activeTab === id && (
-                                <div className={`absolute bottom-0 left-0 right-0 h-1 ${indicatorClass} rounded-t-full`} />
+                                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#33398A] rounded-t-full" />
                             )}
                         </button>
                     )
@@ -331,15 +326,15 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
             </div>
 
             {/* ── Action Buttons ── */}
-            <div className="flex gap-4 justify-end mt-4">
+            <div className="flex flex-row max-sm:gap-3 gap-4 justify-end mt-4">
                 {activeTab > 1 && (
                     <Button
                         variant="outline"
                         onClick={handleBack}
                         disabled={isSubmitting}
-                        className="cursor-pointer border-[#e5e7eb] text-[#364153] font-medium text-[16px] px-8 py-3 rounded-[8px] h-[52px]"
+                        className="cursor-pointer border-[#5C5CFF] text-[#5C5CFF] bg-white hover:bg-[#5C5CFF]/10 font-medium text-[16px] px-8 py-3 rounded-xl h-[52px] max-sm:flex-1 sm:w-[140px] transition-all"
                     >
-                        Back
+                        <span className="mr-1">←</span> Back
                     </Button>
                 )}
 
@@ -347,19 +342,21 @@ export function BookingForm({ masterData, onSuccess }: BookingFormProps) {
                     <Button
                         onClick={handleNext}
                         disabled={isSubmitting}
-                        className="cursor-pointer bg-[#7D3FD0] hover:bg-[#6a2eb8] text-white font-medium text-[16px] px-8 py-3 rounded-[8px] w-[140px] h-[52px] shadow-lg shadow-purple-100"
+                        className="cursor-pointer bg-[#5C5CFF] hover:bg-[#4d4dec] text-white font-medium text-[16px] px-8 py-3 rounded-xl h-[52px] max-sm:flex-1 sm:w-[140px] shadow-sm transition-all"
                     >
                         {isSubmitting ? (
                             <span className="flex items-center gap-2">
                                 <Loader2 className="w-4 h-4 animate-spin" /> Saving...
                             </span>
-                        ) : "Next"}
+                        ) : (
+                            <>Next <span className="ml-1">→</span></>
+                        )}
                     </Button>
                 ) : (
                     <Button
                         onClick={() => setShowConfirmModal(true)}
                         disabled={isSubmitting || !bookingId}
-                        className="cursor-pointer bg-[#7D3FD0] hover:bg-[#6a2eb8] text-white font-medium text-[16px] px-8 py-3 rounded-[8px] h-[52px] shadow-lg shadow-purple-100 disabled:opacity-50 disabled:grayscale"
+                        className="cursor-pointer bg-[#5C5CFF] hover:bg-[#4d4dec] text-white font-medium text-[16px] px-8 py-3 rounded-xl h-[52px] max-sm:flex-1 sm:w-[140px] shadow-sm disabled:opacity-50 disabled:grayscale transition-all"
                     >
                         Submit
                     </Button>

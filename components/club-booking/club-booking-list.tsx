@@ -23,6 +23,18 @@ import {
     PaginationPrevious,
 } from "@/components/ui/pagination";
 
+const formatDisplayDate = (dateString?: string) => {
+    if (!dateString) return "-";
+    const dateStr = dateString.split(" ")[0];
+    try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return dateString;
+        return d.toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" });
+    } catch {
+        return dateString;
+    }
+};
+
 interface ClubBookingListProps {
     config: ListDefinition;
     onViewDetails: (booking: any) => void;
@@ -220,28 +232,29 @@ export function ClubBookingList({ config, onViewDetails }: ClubBookingListProps)
                     <div className="text-center py-12 text-[#667085]">No bookings found.</div>
                 ) : (
                     bookings.map((booking, idx) => (
-                        <div key={idx} onClick={() => onViewDetails(booking)} className="bg-white border border-[#EAECF0] rounded-[16px] p-5 shadow-sm active:scale-[0.98] transition-all cursor-pointer">
-                            <div className="flex items-start justify-between mb-4">
-                                <span className="font-bold text-[#33398A] text-sm bg-[#EEF2FF] px-2.5 py-1 rounded-md">
-                                    #{booking[config.mobileFields.idKey]?.toUpperCase() || booking.name}
-                                </span>
+                        <div key={idx} onClick={() => onViewDetails(booking)} className="bg-white border border-[#EAECF0] rounded-[12px] p-5 shadow-sm hover:shadow-md active:scale-[0.98] transition-all cursor-pointer flex flex-col gap-3">
+                            <div className="flex justify-between items-start">
+                                <div className="font-bold text-[#101828] text-[15px]">
+                                    {booking[config.mobileFields.idKey]?.toUpperCase() || booking.name?.toUpperCase()}
+                                </div>
                                 <StatusBadge status={booking.booking_status || "-"} />
                             </div>
-                            <h4 className="font-bold text-[#101828] text-lg mb-4 line-clamp-2 leading-tight">
+                            <div className="font-bold text-[#101828] text-[15px] mb-1">
                                 {booking[config.mobileFields.titleKey] || "Untitled Event"}
-                            </h4>
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3 text-sm text-[#475467]">
-                                    <div className="h-6 w-6 rounded-full bg-[#F2F4F7] flex items-center justify-center shrink-0">
-                                        <MapPin className="h-3.5 w-3.5 text-[#667085]" />
-                                    </div>
-                                    <span className="font-medium">{booking[config.mobileFields.subtitleKey1] || "-"}</span>
+                            </div>
+                            <div className="w-full h-px bg-[#EAECF0]" />
+                            <div className="flex flex-col gap-2 mt-1">
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-[#667085]">Dates</span>
+                                    <span className="font-medium text-[#101828]">
+                                        {formatDisplayDate(booking.from_date)} - {formatDisplayDate(booking.to_date)}
+                                    </span>
                                 </div>
-                                <div className="flex items-center gap-3 text-sm text-[#475467]">
-                                    <div className="h-6 w-6 rounded-full bg-[#F2F4F7] flex items-center justify-center shrink-0">
-                                        <Calendar className="h-3.5 w-3.5 text-[#667085]" />
-                                    </div>
-                                    <span className="font-medium">{booking[config.mobileFields.subtitleKey2]}</span>
+                                <div className="flex items-center justify-between text-sm">
+                                    <span className="text-[#667085]">Created By</span>
+                                    <span className="font-medium text-[#101828]">
+                                        {booking.full_name || booking.owner || "-"}
+                                    </span>
                                 </div>
                             </div>
                         </div>
